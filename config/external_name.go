@@ -47,6 +47,8 @@ var terraformPluginSDKExternalNameConfigs = map[string]config.ExternalName{
 	"github_membership": config.IdentifierFromProvider,
 	// Can be imported using the following format: {{ organization }}:{{ property_name }}
 	"github_organization_custom_properties": config.IdentifierFromProvider,
+	// Can be imported using the following format: {{ team_slug }}:{{ role_id }}
+	"github_organization_role_team_assignment": config.IdentifierFromProvider,
 	// Imported by using the following format: {{ ruleset ID }}
 	"github_organization_ruleset": config.IdentifierFromProvider,
 	// Imported by using the following format: {{ organization ID }}
