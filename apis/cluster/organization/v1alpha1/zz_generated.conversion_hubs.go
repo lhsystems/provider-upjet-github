@@ -10,4 +10,10 @@ package v1alpha1
 func (tr *OrganizationCustomProperties) Hub() {}
 
 // Hub marks this type as a conversion hub.
+func (tr *OrganizationRoleTeam) Hub() {}
+
+// Hub marks this type as a conversion hub.
+func (tr *OrganizationRoleTeamAssignment) Hub() {}
+
+// Hub marks this type as a conversion hub.
 func (tr *OrganizationSettings) Hub() {}
