@@ -1,0 +1,14 @@
+apiVersion: enterprise.github.upbound.io/v1alpha1
+kind: CostCenter
+metadata:
+  annotations:
+    meta.upbound.io/example-id: enterprise/v1alpha1/costcenter
+  labels:
+    testing.upbound.io/example-name: test-costcenter
+  name: test-costcenter
+spec:
+  forProvider:
+    enterprise: lhg
+    name: "Test Cost Center"
+  providerConfigRef:
+    name: default
