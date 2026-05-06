@@ -1,0 +1,23 @@
+---
+apiVersion: actions.github.upbound.io/v1alpha1
+kind: ActionsRunnerGroup
+metadata:
+  name: hosted-runner-group-test
+spec:
+  forProvider:
+    visibility: all
+    allowPublicRepositories: true
+  providerConfigRef:
+    name: default
+---
+apiVersion: actions.github.upbound.io/v1alpha1
+kind: HostedRunner
+metadata:
+  name: hosted-runner-test
+spec:
+  forProvider:
+    name: test-runner
+    runnerGroupIdRef:
+      name: hosted-runner-group-test
+  providerConfigRef:
+    name: default
