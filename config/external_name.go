@@ -13,6 +13,8 @@ var terraformPluginSDKExternalNameConfigs = map[string]config.ExternalName{
 	"github_actions_environment_secret": config.IdentifierFromProvider,
 	// Can be imported using the following format: {{ repository }}:{{ environment }}:{{ variable }}
 	"github_actions_environment_variable": config.IdentifierFromProvider,
+	// Can be imported using the following format: {{ runner id }}
+	"github_actions_hosted_runner": config.IdentifierFromProvider,
 	// Can be imported using the following format: {{ organization }}
 	"github_actions_organization_permissions": config.IdentifierFromProvider,
 	// Can be imported using the following format: {{ secret id }}
