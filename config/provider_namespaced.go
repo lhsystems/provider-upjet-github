@@ -14,6 +14,7 @@ import (
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actions"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsenvironmentsecret"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsenvironmentvariable"
+	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionshostedrunner"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsorganizationpermissions"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsorganizationsecret"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsorganizationvariable"
@@ -74,6 +75,7 @@ func GetProviderNamespaced(ctx context.Context) (*ujconfig.Provider, error) {
 		actions.Configure,
 		actionsenvironmentsecret.Configure,
 		actionsenvironmentvariable.Configure,
+		actionshostedrunner.Configure,
 		actionsorganizationpermissions.Configure,
 		actionsorganizationsecret.Configure,
 		actionsorganizationvariable.Configure,

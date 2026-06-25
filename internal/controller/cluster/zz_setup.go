@@ -13,6 +13,7 @@ import (
 	actionsvariable "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/actionsvariable"
 	environmentsecret "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/environmentsecret"
 	environmentvariable "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/environmentvariable"
+	hostedrunner "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/hostedrunner"
 	organizationactionssecret "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/organizationactionssecret"
 	organizationactionsvariable "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/organizationactionsvariable"
 	organizationpermissions "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/actions/organizationpermissions"
@@ -60,6 +61,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		actionsvariable.Setup,
 		environmentsecret.Setup,
 		environmentvariable.Setup,
+		hostedrunner.Setup,
 		organizationactionssecret.Setup,
 		organizationactionsvariable.Setup,
 		organizationpermissions.Setup,
@@ -120,6 +122,7 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		actionsvariable.SetupGated,
 		environmentsecret.SetupGated,
 		environmentvariable.SetupGated,
+		hostedrunner.SetupGated,
 		organizationactionssecret.SetupGated,
 		organizationactionsvariable.SetupGated,
 		organizationpermissions.SetupGated,

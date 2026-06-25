@@ -14,6 +14,7 @@ import (
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actions"
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionsenvironmentsecret"
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionsenvironmentvariable"
+	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionshostedrunner"
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionsorganizationpermissions"
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionsorganizationsecret"
 	"github.com/crossplane-contrib/provider-upjet-github/config/cluster/actionsorganizationvariable"
@@ -75,6 +76,7 @@ func GetProvider(ctx context.Context) (*ujconfig.Provider, error) {
 		actions.Configure,
 		actionsenvironmentsecret.Configure,
 		actionsenvironmentvariable.Configure,
+		actionshostedrunner.Configure,
 		actionsorganizationpermissions.Configure,
 		actionsorganizationsecret.Configure,
 		actionsorganizationvariable.Configure,

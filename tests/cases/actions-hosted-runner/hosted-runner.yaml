@@ -1,0 +1,21 @@
+---
+apiVersion: actions.github.upbound.io/v1alpha1
+kind: HostedRunner
+metadata:
+  name: hosted-runner-test
+spec:
+  forProvider:
+    name: test-runner
+    # NOTE: runnerGroupId must be supplied as a literal integer.
+    # Cross-resource references are not generated for this field because
+    # the underlying Terraform attribute is an int (schema.TypeInt) and
+    # upjet's reference resolver template only supports *string fields.
+    # Replace the value below with the numeric ID of an existing runner
+    # group (e.g. fetched via the GitHub API or another managed resource).
+    runnerGroupId: 1
+    size: 4-core
+    image:
+      - id: "ubuntu-latest"
+        source: github
+  providerConfigRef:
+    name: default
