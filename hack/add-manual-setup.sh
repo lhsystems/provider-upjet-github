@@ -15,9 +15,6 @@ add_manual_setup() {
         return 0
     fi
 
-    # Store original file permissions
-    ORIGINAL_PERMS=$(stat -f "%Mp%Lp" "$setup_file" 2>/dev/null || stat -c "%a" "$setup_file" 2>/dev/null || echo "644")
-
     # Create a temporary file with proper line endings
     TEMP_FILE=$(mktemp)
 
