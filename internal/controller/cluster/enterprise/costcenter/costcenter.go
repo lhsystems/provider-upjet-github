@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/bradleyfalzon/ghinstallation/v2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -85,9 +87,31 @@ type GitHubService interface {
 
 // gitHubService implements GitHubService using raw HTTP requests
 type gitHubService struct {
-	token   string
 	baseURL string
 	client  *http.Client
+}
+
+type githubAppAuth struct {
+	ID             string `json:"id"`
+	InstallationID string `json:"installation_id"`
+	PEMFile        string `json:"pem_file"`
+}
+
+type githubCredentials struct {
+	Token   *string          `json:"token,omitempty"`
+	BaseURL *string          `json:"base_url,omitempty"`
+	AppAuth *[]githubAppAuth `json:"app_auth,omitempty"`
+}
+
+type bearerAuthTransport struct {
+	token string
+	base  http.RoundTripper
+}
+
+func (t *bearerAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req = req.Clone(req.Context())
+	req.Header.Set("Authorization", "Bearer "+t.token)
+	return t.base.RoundTrip(req)
 }
 
 // AddResourcesToCostCenter adds organizations or repositories to a cost center
@@ -142,15 +166,43 @@ func (s *gitHubService) RemoveResourcesFromCostCenter(ctx context.Context, enter
 	return nil
 }
 
-func newGitHubService(_ context.Context, token string, baseURL string) GitHubService {
-	if baseURL == "" {
-		baseURL = "https://api.github.com"
+func newGitHubService(_ context.Context, creds githubCredentials) (GitHubService, error) {
+	baseURL := "https://api.github.com"
+	if creds.BaseURL != nil && *creds.BaseURL != "" {
+		baseURL = *creds.BaseURL
 	}
+
+	var transport http.RoundTripper
+	switch {
+	case creds.AppAuth != nil:
+		if len(*creds.AppAuth) != 1 {
+			return nil, errors.New("GitHub app_auth must contain exactly one configuration")
+		}
+		appAuth := (*creds.AppAuth)[0]
+		appID, err := strconv.ParseInt(appAuth.ID, 10, 64)
+		if err != nil {
+			return nil, errors.Wrap(err, "GitHub app_auth id must be an integer")
+		}
+		installationID, err := strconv.ParseInt(appAuth.InstallationID, 10, 64)
+		if err != nil {
+			return nil, errors.Wrap(err, "GitHub app_auth installation_id must be an integer")
+		}
+		installationTransport, err := ghinstallation.New(http.DefaultTransport, appID, installationID, []byte(appAuth.PEMFile))
+		if err != nil {
+			return nil, errors.Wrap(err, "cannot configure GitHub App authentication")
+		}
+		installationTransport.BaseURL = strings.TrimRight(baseURL, "/")
+		transport = installationTransport
+	case creds.Token != nil && *creds.Token != "":
+		transport = &bearerAuthTransport{token: *creds.Token, base: http.DefaultTransport}
+	default:
+		return nil, errors.New("GitHub token or app_auth is required but not provided in credentials")
+	}
+
 	return &gitHubService{
-		token:   token,
 		baseURL: baseURL,
-		client:  &http.Client{},
-	}
+		client:  &http.Client{Transport: transport},
+	}, nil
 }
 
 func (s *gitHubService) makeRequest(ctx context.Context, method, path string, body interface{}) (*http.Response, error) {
@@ -172,7 +224,6 @@ func (s *gitHubService) makeRequest(ctx context.Context, method, path string, bo
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
 
-	req.Header.Set("Authorization", "Bearer "+s.token)
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
 
@@ -362,7 +413,7 @@ type DirectCostCenterReconciler struct {
 	client.Client
 	Scheme       *runtime.Scheme
 	Logger       logging.Logger
-	newServiceFn func(ctx context.Context, token string, baseURL string) GitHubService
+	newServiceFn func(ctx context.Context, creds githubCredentials) (GitHubService, error)
 	recorder     event.Recorder
 }
 
@@ -382,8 +433,11 @@ func (r *DirectCostCenterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 	}
 
 	result, err := r.ensureFinalizer(ctx, &costCenter)
-	if err != nil || result.Requeue {
-		return result, err
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if result.Requeue || result.RequeueAfter > 0 {
+		return result, nil
 	}
 
 	return r.reconcileResource(ctx, req, &costCenter)
