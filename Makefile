@@ -27,6 +27,10 @@ PLATFORMS ?= linux_amd64 linux_arm64
 # to run a target until the include commands succeeded.
 -include build/makelib/common.mk
 
+# Ensure tools in $(GOPATH)/bin (e.g. goimports) are in PATH for make targets
+GOPATH ?= $(shell go env GOPATH)
+export PATH := $(GOPATH)/bin:$(PATH)
+
 # ====================================================================================
 # Setup Output
 

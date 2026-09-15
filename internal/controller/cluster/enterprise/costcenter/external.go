@@ -297,30 +297,14 @@ func (r *DirectCostCenterReconciler) getExternalClient(ctx context.Context, cr *
 		return nil, errors.Wrap(err, errGetCreds)
 	}
 
-	type githubCreds struct {
-		Token   *string `json:"token,omitempty"`
-		BaseURL *string `json:"base_url,omitempty"`
-	}
-
-	var creds githubCreds
+	var creds githubCredentials
 	if err := json.Unmarshal(data, &creds); err != nil {
 		return nil, errors.Wrap(err, "failed to parse GitHub credentials JSON")
 	}
 
-	token := ""
-	if creds.Token != nil {
-		token = *creds.Token
+	svc, err := r.newServiceFn(ctx, creds)
+	if err != nil {
+		return nil, errors.Wrap(err, errNewClient)
 	}
-
-	if token == "" {
-		return nil, errors.New("GitHub token is required but not provided in credentials")
-	}
-
-	baseURL := "https://api.github.com"
-	if creds.BaseURL != nil && *creds.BaseURL != "" {
-		baseURL = *creds.BaseURL
-	}
-
-	svc := r.newServiceFn(ctx, token, baseURL)
 	return &external{service: svc}, nil
 }
