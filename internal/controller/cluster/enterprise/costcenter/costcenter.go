@@ -432,30 +432,30 @@ func (r *DirectCostCenterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.handleDeletion(ctx, &costCenter)
 	}
 
-	result, err := r.ensureFinalizer(ctx, &costCenter)
+	added, err := r.ensureFinalizer(ctx, &costCenter)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
-	if result.Requeue || result.RequeueAfter > 0 {
-		return result, nil
+	if added {
+		return ctrl.Result{RequeueAfter: time.Second}, nil
 	}
 
 	return r.reconcileResource(ctx, req, &costCenter)
 }
 
-func (r *DirectCostCenterReconciler) ensureFinalizer(ctx context.Context, costCenter *v1alpha1.CostCenter) (ctrl.Result, error) {
+func (r *DirectCostCenterReconciler) ensureFinalizer(ctx context.Context, costCenter *v1alpha1.CostCenter) (bool, error) {
 	const finalizer = "finalizer.managedresource.crossplane.io"
 	if !containsFinalizer(costCenter.GetFinalizers(), finalizer) {
 		costCenter.SetFinalizers(append(costCenter.GetFinalizers(), finalizer))
 		if err := r.Update(ctx, costCenter); err != nil {
 			r.Logger.Info("Failed to add finalizer", "error", err)
 			r.recorder.Event(costCenter, event.Warning("FinalizerError", err))
-			return ctrl.Result{}, err
+			return false, err
 		}
 		r.recorder.Event(costCenter, event.Normal("FinalizerAdded", "Successfully added finalizer"))
-		return ctrl.Result{Requeue: true}, nil
+		return true, nil
 	}
-	return ctrl.Result{}, nil
+	return false, nil
 }
 
 func (r *DirectCostCenterReconciler) reconcileResource(ctx context.Context, req ctrl.Request, costCenter *v1alpha1.CostCenter) (ctrl.Result, error) {
