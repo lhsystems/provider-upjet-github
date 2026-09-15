@@ -432,9 +432,13 @@ func (r *DirectCostCenterReconciler) Reconcile(ctx context.Context, req ctrl.Req
 		return r.handleDeletion(ctx, &costCenter)
 	}
 
-	if err != nil || result.RequeueAfter > 0 {
-    return result, err
-}
+	result, err := r.ensureFinalizer(ctx, &costCenter)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+	if result.Requeue || result.RequeueAfter > 0 {
+		return result, nil
+	}
 
 	return r.reconcileResource(ctx, req, &costCenter)
 }
