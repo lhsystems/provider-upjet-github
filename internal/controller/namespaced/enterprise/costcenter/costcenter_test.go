@@ -28,7 +28,7 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	cr := &enterprise.CostCenter{}
 	cr.Name = "cost-center"
 	cr.Namespace = "team-a"
-	cr.Spec.ProviderConfigReference = &xpv1.Reference{Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
 
 	r := &reconciler{
 		Client: client,
