@@ -589,6 +589,7 @@ func (r *DirectCostCenterReconciler) handleDeletion(ctx context.Context, costCen
 	if err != nil {
 		r.Logger.Info("Failed to create external client for deletion", "error", err)
 		r.recorder.Event(costCenter, event.Warning("DeletionClientError", err))
+		return ctrl.Result{RequeueAfter: time.Minute}, err
 	} else {
 		err = externalClient.Delete(ctx, costCenter)
 		if err != nil {
