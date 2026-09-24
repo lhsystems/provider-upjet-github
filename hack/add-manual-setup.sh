@@ -50,3 +50,4 @@ add_manual_setup() {
 
 for setup_file in "$CLUSTER_SETUP_FILE" "$NAMESPACED_SETUP_FILE"; do
     add_manual_setup "$setup_file"
+done
