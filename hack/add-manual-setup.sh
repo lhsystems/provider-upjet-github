@@ -1,6 +1,8 @@
 #!/bin/bash
 # Post-generation script to add manual controller setup
 
+set -euo pipefail
+
 CLUSTER_SETUP_FILE="internal/controller/cluster/zz_setup.go"
 NAMESPACED_SETUP_FILE="internal/controller/namespaced/zz_setup.go"
 
@@ -9,18 +11,19 @@ echo "Adding manual controller setup to zz_setup.go files..."
 add_manual_setup() {
     local setup_file="$1"
 
-    # Check if the manual setup call already exists
+    if [[ ! -f "$setup_file" ]]; then
+        echo "Skipping missing generated setup file: $setup_file"
+        return 0
+    fi
+
     if grep -q "SetupManual" "$setup_file"; then
         echo "Manual setup already exists in $setup_file"
         return 0
     fi
 
-    # Create a temporary file with proper line endings
-    TEMP_FILE=$(mktemp)
+    local temp_file
+    temp_file=$(mktemp)
 
-    # Read the file and add the manual setup before each 'return nil' that closes
-    # a Setup/SetupGated function (i.e. the ones preceded by a closing brace of the
-    # for-loop). We track which function we are in and inject into both.
     awk '
     /^func Setup\(/ { in_setup = 1; in_setupgated = 0 }
     /^func SetupGated\(/ { in_setupgated = 1; in_setup = 0 }
@@ -37,16 +40,13 @@ add_manual_setup() {
         in_setupgated = 0
     }
     { print }
-    ' "$setup_file" > "$TEMP_FILE"
+    ' "$setup_file" > "$temp_file"
 
-    # Replace the original file with the temp file to maintain consistent line endings
-    mv "$TEMP_FILE" "$setup_file"
-
-    # Ensure consistent file permissions (644 - readable/writable by owner, readable by group/others)
+    mv "$temp_file" "$setup_file"
     chmod 644 "$setup_file"
 
     echo "Manual controller setup added to $setup_file"
 }
 
-add_manual_setup "$CLUSTER_SETUP_FILE"
-add_manual_setup "$NAMESPACED_SETUP_FILE"
+for setup_file in "$CLUSTER_SETUP_FILE" "$NAMESPACED_SETUP_FILE"; do
+    add_manual_setup "$setup_file"
