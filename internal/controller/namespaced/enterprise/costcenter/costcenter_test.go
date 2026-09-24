@@ -6,6 +6,7 @@ import (
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
 	namespaced "github.com/crossplane-contrib/provider-upjet-github/apis/namespaced"
@@ -24,14 +25,14 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	pc.Name = "github"
 	pc.Namespace = "team-a"
 	pc.Spec.Credentials.Source = xpv1.CredentialsSource("None")
-	client := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc).Build()
+	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc).Build()
 	cr := &enterprise.CostCenter{}
 	cr.Name = "cost-center"
 	cr.Namespace = "team-a"
 	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
 
 	r := &reconciler{
-		Client: client,
+		Client: kubeClient,
 		newService: func(_ context.Context, credentials clustercc.GithubCredentials) (clustercc.GitHubService, error) {
 			return nil, nil
 		},
@@ -42,5 +43,34 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	}
 	if got.Name != pc.Name || got.Namespace != pc.Namespace {
 		t.Fatalf("providerConfig() = %s/%s, want %s/%s", got.Namespace, got.Name, pc.Namespace, pc.Name)
+	}
+}
+
+func TestDeleteRetainsFinalizerWhenProviderConfigUnavailable(t *testing.T) {
+	scheme := runtime.NewScheme()
+	if err := namespaced.AddToScheme(scheme); err != nil {
+		t.Fatalf("AddToScheme() error = %v", err)
+	}
+
+	cr := &enterprise.CostCenter{}
+	cr.Name = "cost-center"
+	cr.Namespace = "team-a"
+	cr.Finalizers = []string{finalizer}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Status.AtProvider.ID = func() *string { value := "cost-center-id"; return &value }()
+
+	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cr).Build()
+	r := &reconciler{Client: kubeClient}
+
+	if _, err := r.delete(context.Background(), cr); err == nil {
+		t.Fatal("delete() error = nil, want ProviderConfig lookup error")
+	}
+
+	var got enterprise.CostCenter
+	if err := kubeClient.Get(context.Background(), client.ObjectKeyFromObject(cr), &got); err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if len(got.Finalizers) != 1 || got.Finalizers[0] != finalizer {
+		t.Fatalf("finalizers = %v, want %q", got.Finalizers, finalizer)
 	}
 }
