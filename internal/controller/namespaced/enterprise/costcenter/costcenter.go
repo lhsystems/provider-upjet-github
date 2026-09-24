@@ -212,9 +212,10 @@ func (r *reconciler) delete(ctx context.Context, cr *v1alpha1.CostCenter) (ctrl.
 	}
 	if cr.Status.AtProvider.ID != nil {
 		service, err := r.service(ctx, cr)
-		if err == nil {
-			err = service.DeleteCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID)
+		if err != nil {
+			return ctrl.Result{RequeueAfter: time.Minute}, err
 		}
+		err = service.DeleteCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID)
 		if err != nil && !apierrors.IsNotFound(err) {
 			return ctrl.Result{RequeueAfter: time.Minute}, err
 		}
