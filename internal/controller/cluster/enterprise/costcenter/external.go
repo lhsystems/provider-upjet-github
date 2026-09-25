@@ -246,6 +246,10 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 	}
 
 	if err := e.service.DeleteCostCenter(ctx, *enterprise, *id); err != nil {
+		var notFoundErr *NotFoundError
+		if errors.As(err, &notFoundErr) {
+			return nil
+		}
 		return err
 	}
 

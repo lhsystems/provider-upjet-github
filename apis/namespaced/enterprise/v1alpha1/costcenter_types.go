@@ -30,12 +30,10 @@ type CostCenterObservation struct {
 }
 
 type CostCenterParameters struct {
-	Enterprise         *string       `json:"enterprise"`
-	EnterpriseRef      *v1.Reference `json:"enterpriseRef,omitempty"`
-	EnterpriseSelector *v1.Selector  `json:"enterpriseSelector,omitempty"`
-	Name               *string       `json:"name"`
-	Organizations      []string      `json:"organizations,omitempty"`
-	Repositories       []string      `json:"repositories,omitempty"`
+	Enterprise    *string  `json:"enterprise"`
+	Name          *string  `json:"name"`
+	Organizations []string `json:"organizations,omitempty"`
+	Repositories  []string `json:"repositories,omitempty"`
 }
 
 type CostCenterSpec struct {

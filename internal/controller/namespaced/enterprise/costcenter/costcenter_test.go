@@ -5,7 +5,9 @@ import (
 	"testing"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -72,5 +74,34 @@ func TestDeleteRetainsFinalizerWhenProviderConfigUnavailable(t *testing.T) {
 	}
 	if len(got.Finalizers) != 1 || got.Finalizers[0] != finalizer {
 		t.Fatalf("finalizers = %v, want %q", got.Finalizers, finalizer)
+	}
+}
+
+func TestProviderConfigUsageTracking(t *testing.T) {
+	scheme := runtime.NewScheme()
+	if err := namespaced.AddToScheme(scheme); err != nil {
+		t.Fatalf("AddToScheme() error = %v", err)
+	}
+
+	cr := &enterprise.CostCenter{}
+	cr.APIVersion = enterprise.CRDGroupVersion.String()
+	cr.Kind = enterprise.CostCenterKind
+	cr.Name = "cost-center"
+	cr.Namespace = "team-a"
+	cr.UID = types.UID("cost-center-uid")
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+
+	kubeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+	tracker := resource.NewProviderConfigUsageTracker(kubeClient, &providerconfig.ProviderConfigUsage{})
+	if err := tracker.Track(context.Background(), cr); err != nil {
+		t.Fatalf("Track() error = %v", err)
+	}
+
+	usage := &providerconfig.ProviderConfigUsage{}
+	if err := kubeClient.Get(context.Background(), client.ObjectKey{Name: string(cr.UID), Namespace: cr.Namespace}, usage); err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	if got := usage.GetProviderConfigReference(); got.Name != "github" || got.Kind != "ProviderConfig" {
+		t.Fatalf("ProviderConfigReference = %#v, want ProviderConfig/github", got)
 	}
 }

@@ -9,7 +9,6 @@
 package v1alpha1
 
 import (
-	"github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -846,16 +845,6 @@ func (in *CostCenterParameters) DeepCopyInto(out *CostCenterParameters) {
 		in, out := &in.Enterprise, &out.Enterprise
 		*out = new(string)
 		**out = **in
-	}
-	if in.EnterpriseRef != nil {
-		in, out := &in.EnterpriseRef, &out.EnterpriseRef
-		*out = new(v1.Reference)
-		(*in).DeepCopyInto(*out)
-	}
-	if in.EnterpriseSelector != nil {
-		in, out := &in.EnterpriseSelector, &out.EnterpriseSelector
-		*out = new(v1.Selector)
-		(*in).DeepCopyInto(*out)
 	}
 	if in.Name != nil {
 		in, out := &in.Name, &out.Name

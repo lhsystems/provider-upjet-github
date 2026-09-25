@@ -34,15 +34,27 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := "costcenter-direct-namespaced"
-	r := &reconciler{Client: mgr.GetClient(), Logger: o.Logger.WithValues("controller", name), recorder: event.NewAPIRecorder(mgr.GetEventRecorderFor(name)), newService: clustercc.NewGitHubService}
-	return ctrl.NewControllerManagedBy(mgr).Named(name).WithOptions(o.ForControllerRuntime()).For(&v1alpha1.CostCenter{}).Complete(r)
+	r := &reconciler{
+		Client:       mgr.GetClient(),
+		Logger:       o.Logger.WithValues("controller", name),
+		recorder:     event.NewAPIRecorder(mgr.GetEventRecorderFor(name)),
+		newService:   clustercc.NewGitHubService,
+		usageTracker: resource.NewProviderConfigUsageTracker(mgr.GetClient(), &apisv1beta1.ProviderConfigUsage{}),
+	}
+	return ctrl.NewControllerManagedBy(mgr).
+		Named(name).
+		WithOptions(o.ForControllerRuntime()).
+		WithEventFilter(resource.DesiredStateChanged()).
+		For(&v1alpha1.CostCenter{}).
+		Complete(r)
 }
 
 type reconciler struct {
 	client.Client
-	Logger     logging.Logger
-	recorder   event.Recorder
-	newService func(context.Context, clustercc.GithubCredentials) (clustercc.GitHubService, error)
+	Logger       logging.Logger
+	recorder     event.Recorder
+	newService   func(context.Context, clustercc.GithubCredentials) (clustercc.GitHubService, error)
+	usageTracker *resource.ProviderConfigUsageTracker
 }
 
 func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
@@ -59,6 +71,9 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 			return ctrl.Result{}, err
 		}
 		return ctrl.Result{RequeueAfter: time.Second}, nil
+	}
+	if err := r.usageTracker.Track(ctx, &cr); err != nil {
+		return ctrl.Result{RequeueAfter: time.Minute}, errors.Wrap(err, "cannot track ProviderConfig usage")
 	}
 
 	service, err := r.service(ctx, &cr)
