@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/crossplane/crossplane-runtime/v2/pkg/meta"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -85,20 +86,24 @@ func (r *reconciler) reconcileExternal(ctx context.Context, cr *v1alpha1.CostCen
 	for i, resource := range found.Resources {
 		cr.Status.AtProvider.Resources[i] = v1alpha1.CostCenterResource{Type: resource.Type, Name: resource.Name}
 	}
+	cr.Status.SetConditions(xpv1.ReconcileSuccess(), xpv1.Available())
+	if err := r.Status().Update(ctx, cr); err != nil {
+		return ctrl.Result{RequeueAfter: time.Minute}, err
+	}
 	if found.ID != nil {
-		annotations := cr.GetAnnotations()
+		var latest v1alpha1.CostCenter
+		if err := r.Get(ctx, client.ObjectKeyFromObject(cr), &latest); err != nil {
+			return ctrl.Result{RequeueAfter: time.Minute}, err
+		}
+		annotations := latest.GetAnnotations()
 		if annotations == nil {
 			annotations = map[string]string{}
 		}
 		annotations["crossplane.io/external-name"] = *found.ID
-		cr.SetAnnotations(annotations)
-	}
-	if err := r.Update(ctx, cr); err != nil {
-		return ctrl.Result{RequeueAfter: time.Minute}, err
-	}
-	cr.Status.SetConditions(xpv1.ReconcileSuccess(), xpv1.Available())
-	if err := r.Status().Update(ctx, cr); err != nil {
-		return ctrl.Result{RequeueAfter: time.Minute}, err
+		latest.SetAnnotations(annotations)
+		if err := r.Update(ctx, &latest); err != nil {
+			return ctrl.Result{RequeueAfter: time.Minute}, err
+		}
 	}
 	return ctrl.Result{RequeueAfter: 10 * time.Minute}, nil
 }
@@ -209,26 +214,46 @@ func (r *reconciler) delete(ctx context.Context, cr *v1alpha1.CostCenter) (ctrl.
 	if !contains(cr.GetFinalizers(), finalizer) {
 		return ctrl.Result{}, nil
 	}
-	if cr.Status.AtProvider.ID != nil {
-		service, err := r.service(ctx, cr)
-		if err != nil {
+	costCenterID := cr.Status.AtProvider.ID
+	if costCenterID == nil {
+		if externalName := meta.GetExternalName(cr); externalName != "" {
+			costCenterID = &externalName
+		}
+	}
+	if costCenterID != nil {
+		if err := r.deleteExternalCostCenter(ctx, cr, *costCenterID); err != nil {
 			return ctrl.Result{RequeueAfter: time.Minute}, err
-		}
-		err = service.DeleteCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID)
-		if err == nil {
-			if _, err = service.GetCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID); err == nil {
-				return ctrl.Result{RequeueAfter: time.Minute}, errors.New("cost center deletion is still in progress")
-			}
-		}
-		if err != nil {
-			var notFoundErr *clustercc.NotFoundError
-			if !errors.As(err, &notFoundErr) {
-				return ctrl.Result{RequeueAfter: time.Minute}, err
-			}
 		}
 	}
 	cr.SetFinalizers(remove(cr.GetFinalizers(), finalizer))
 	return ctrl.Result{}, r.Update(ctx, cr)
+}
+
+func (r *reconciler) deleteExternalCostCenter(ctx context.Context, cr *v1alpha1.CostCenter, costCenterID string) error {
+	service, err := r.service(ctx, cr)
+	if err != nil {
+		return err
+	}
+	if err := service.DeleteCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, costCenterID); err != nil {
+		return ignoreNotFound(err)
+	}
+
+	costCenter, err := service.GetCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, costCenterID)
+	if err != nil {
+		return ignoreNotFound(err)
+	}
+	if costCenter.State == nil || *costCenter.State != "deleted" {
+		return errors.New("cost center deletion is still in progress")
+	}
+	return nil
+}
+
+func ignoreNotFound(err error) error {
+	var notFoundErr *clustercc.NotFoundError
+	if errors.As(err, &notFoundErr) {
+		return nil
+	}
+	return err
 }
 
 func contains(values []string, value string) bool {

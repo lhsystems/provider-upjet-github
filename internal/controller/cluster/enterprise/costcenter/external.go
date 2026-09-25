@@ -249,8 +249,11 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 		return err
 	}
 
-	if _, err := e.service.GetCostCenter(ctx, *enterprise, *id); err == nil {
-		return errors.New("cost center deletion is still in progress")
+	costCenter, err := e.service.GetCostCenter(ctx, *enterprise, *id)
+	if err == nil {
+		if costCenter.State == nil || *costCenter.State != "deleted" {
+			return errors.New("cost center deletion is still in progress")
+		}
 	} else {
 		var notFoundErr *NotFoundError
 		if !errors.As(err, &notFoundErr) {
