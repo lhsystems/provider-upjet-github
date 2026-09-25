@@ -245,7 +245,27 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 		return errors.New("enterprise and id must be specified for deletion")
 	}
 
-	return e.service.DeleteCostCenter(ctx, *enterprise, *id)
+	if err := e.service.DeleteCostCenter(ctx, *enterprise, *id); err != nil {
+		var notFoundErr *NotFoundError
+		if errors.As(err, &notFoundErr) {
+			return nil
+		}
+		return err
+	}
+
+	costCenter, err := e.service.GetCostCenter(ctx, *enterprise, *id)
+	if err == nil {
+		if costCenter.State == nil || *costCenter.State != "deleted" {
+			return errors.New("cost center deletion is still in progress")
+		}
+	} else {
+		var notFoundErr *NotFoundError
+		if !errors.As(err, &notFoundErr) {
+			return errors.Wrap(err, "failed to verify cost center deletion")
+		}
+	}
+
+	return nil
 }
 
 // updateStatus updates the status fields and sets the external name annotation
@@ -297,30 +317,14 @@ func (r *DirectCostCenterReconciler) getExternalClient(ctx context.Context, cr *
 		return nil, errors.Wrap(err, errGetCreds)
 	}
 
-	type githubCreds struct {
-		Token   *string `json:"token,omitempty"`
-		BaseURL *string `json:"base_url,omitempty"`
-	}
-
-	var creds githubCreds
+	var creds githubCredentials
 	if err := json.Unmarshal(data, &creds); err != nil {
 		return nil, errors.Wrap(err, "failed to parse GitHub credentials JSON")
 	}
 
-	token := ""
-	if creds.Token != nil {
-		token = *creds.Token
+	svc, err := r.newServiceFn(ctx, creds)
+	if err != nil {
+		return nil, errors.Wrap(err, errNewClient)
 	}
-
-	if token == "" {
-		return nil, errors.New("GitHub token is required but not provided in credentials")
-	}
-
-	baseURL := "https://api.github.com"
-	if creds.BaseURL != nil && *creds.BaseURL != "" {
-		baseURL = *creds.BaseURL
-	}
-
-	svc := r.newServiceFn(ctx, token, baseURL)
 	return &external{service: svc}, nil
 }
