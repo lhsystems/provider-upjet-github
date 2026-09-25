@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -216,8 +215,16 @@ func (r *reconciler) delete(ctx context.Context, cr *v1alpha1.CostCenter) (ctrl.
 			return ctrl.Result{RequeueAfter: time.Minute}, err
 		}
 		err = service.DeleteCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID)
-		if err != nil && !apierrors.IsNotFound(err) {
-			return ctrl.Result{RequeueAfter: time.Minute}, err
+		if err == nil {
+			if _, err = service.GetCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Status.AtProvider.ID); err == nil {
+				return ctrl.Result{RequeueAfter: time.Minute}, errors.New("cost center deletion is still in progress")
+			}
+		}
+		if err != nil {
+			var notFoundErr *clustercc.NotFoundError
+			if !errors.As(err, &notFoundErr) {
+				return ctrl.Result{RequeueAfter: time.Minute}, err
+			}
 		}
 	}
 	cr.SetFinalizers(remove(cr.GetFinalizers(), finalizer))

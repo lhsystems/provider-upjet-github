@@ -245,7 +245,20 @@ func (e *external) Delete(ctx context.Context, mg resource.Managed) error {
 		return errors.New("enterprise and id must be specified for deletion")
 	}
 
-	return e.service.DeleteCostCenter(ctx, *enterprise, *id)
+	if err := e.service.DeleteCostCenter(ctx, *enterprise, *id); err != nil {
+		return err
+	}
+
+	if _, err := e.service.GetCostCenter(ctx, *enterprise, *id); err == nil {
+		return errors.New("cost center deletion is still in progress")
+	} else {
+		var notFoundErr *NotFoundError
+		if !errors.As(err, &notFoundErr) {
+			return errors.Wrap(err, "failed to verify cost center deletion")
+		}
+	}
+
+	return nil
 }
 
 // updateStatus updates the status fields and sets the external name annotation
