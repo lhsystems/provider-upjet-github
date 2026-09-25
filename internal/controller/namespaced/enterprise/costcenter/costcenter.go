@@ -89,12 +89,12 @@ func (r *reconciler) reconcileExternal(ctx context.Context, cr *v1alpha1.CostCen
 		return ctrl.Result{RequeueAfter: time.Minute}, err
 	}
 	found := findCostCenter(centers, cr)
-	found, err = ensureCostCenter(ctx, service, cr, found)
+	found, err = reconcileCostCenterState(ctx, service, cr, found)
 	if err != nil {
 		return ctrl.Result{RequeueAfter: time.Minute}, err
 	}
-	if err := syncResources(ctx, service, cr, found); err != nil {
-		return ctrl.Result{RequeueAfter: time.Minute}, err
+	if found == nil {
+		return ctrl.Result{RequeueAfter: 10 * time.Minute}, nil
 	}
 	cr.Status.AtProvider.ID, cr.Status.AtProvider.Name, cr.Status.AtProvider.State = found.ID, found.Name, found.State
 	cr.Status.AtProvider.Resources = make([]v1alpha1.CostCenterResource, len(found.Resources))
@@ -123,11 +123,28 @@ func (r *reconciler) reconcileExternal(ctx context.Context, cr *v1alpha1.CostCen
 	return ctrl.Result{RequeueAfter: 10 * time.Minute}, nil
 }
 
-func ensureCostCenter(ctx context.Context, service clustercc.GitHubService, cr *v1alpha1.CostCenter, found *clustercc.CostCenter) (*clustercc.CostCenter, error) {
+func reconcileCostCenterState(ctx context.Context, service clustercc.GitHubService, cr *v1alpha1.CostCenter, found *clustercc.CostCenter) (*clustercc.CostCenter, error) {
+	allowUpdate := allows(cr, xpv1.ManagementActionUpdate)
+	found, err := ensureCostCenter(ctx, service, cr, found, allows(cr, xpv1.ManagementActionCreate), allowUpdate)
+	if err != nil || found == nil {
+		return found, err
+	}
+	if allowUpdate {
+		if err := syncResources(ctx, service, cr, found); err != nil {
+			return nil, err
+		}
+	}
+	return found, nil
+}
+
+func ensureCostCenter(ctx context.Context, service clustercc.GitHubService, cr *v1alpha1.CostCenter, found *clustercc.CostCenter, allowCreate, allowUpdate bool) (*clustercc.CostCenter, error) {
 	if found == nil {
+		if !allowCreate {
+			return nil, nil
+		}
 		return service.CreateCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *cr.Spec.ForProvider.Name)
 	}
-	if cr.Spec.ForProvider.Name != nil && found.Name != nil && *cr.Spec.ForProvider.Name != *found.Name {
+	if allowUpdate && cr.Spec.ForProvider.Name != nil && found.Name != nil && *cr.Spec.ForProvider.Name != *found.Name {
 		return service.UpdateCostCenter(ctx, *cr.Spec.ForProvider.Enterprise, *found.ID, *cr.Spec.ForProvider.Name)
 	}
 	return found, nil
@@ -202,7 +219,13 @@ func (r *reconciler) service(ctx context.Context, cr *v1alpha1.CostCenter) (clus
 	if err != nil {
 		return nil, err
 	}
-	data, err := resource.CommonCredentialExtractor(ctx, pc.Spec.Credentials.Source, r.Client, pc.Spec.Credentials.CommonCredentialSelectors)
+	credentials := pc.Spec.Credentials
+	if credentials.SecretRef != nil {
+		secretRef := *credentials.SecretRef
+		secretRef.Namespace = cr.Namespace
+		credentials.SecretRef = &secretRef
+	}
+	data, err := resource.CommonCredentialExtractor(ctx, credentials.Source, r.Client, credentials.CommonCredentialSelectors)
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot get credentials")
 	}
@@ -228,6 +251,10 @@ func (r *reconciler) providerConfig(ctx context.Context, cr *v1alpha1.CostCenter
 func (r *reconciler) delete(ctx context.Context, cr *v1alpha1.CostCenter) (ctrl.Result, error) {
 	if !contains(cr.GetFinalizers(), finalizer) {
 		return ctrl.Result{}, nil
+	}
+	if !allows(cr, xpv1.ManagementActionDelete) {
+		cr.SetFinalizers(remove(cr.GetFinalizers(), finalizer))
+		return ctrl.Result{}, r.Update(ctx, cr)
 	}
 	costCenterID := cr.Status.AtProvider.ID
 	if costCenterID == nil {
@@ -269,6 +296,19 @@ func ignoreNotFound(err error) error {
 		return nil
 	}
 	return err
+}
+
+func allows(cr *v1alpha1.CostCenter, action xpv1.ManagementAction) bool {
+	policies := cr.GetManagementPolicies()
+	if len(policies) == 0 {
+		return true
+	}
+	for _, policy := range policies {
+		if policy == xpv1.ManagementActionAll || policy == action {
+			return true
+		}
+	}
+	return false
 }
 
 func contains(values []string, value string) bool {

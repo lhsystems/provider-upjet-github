@@ -30,7 +30,8 @@ type CostCenterObservation struct {
 }
 
 type CostCenterParameters struct {
-	Enterprise    *string  `json:"enterprise"`
+	Enterprise *string `json:"enterprise"`
+	// +kubebuilder:validation:MaxLength=255
 	Name          *string  `json:"name"`
 	Organizations []string `json:"organizations,omitempty"`
 	Repositories  []string `json:"repositories,omitempty"`

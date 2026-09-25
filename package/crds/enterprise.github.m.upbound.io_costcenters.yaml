@@ -59,6 +59,7 @@ spec:
                   enterprise:
                     type: string
                   name:
+                    maxLength: 255
                     type: string
                   organizations:
                     items:
