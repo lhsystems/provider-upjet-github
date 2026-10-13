@@ -1,0 +1,326 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.19.0
+  name: budgets.enterprise.github.upbound.io
+spec:
+  group: enterprise.github.upbound.io
+  names:
+    categories:
+    - crossplane
+    - managed
+    - github
+    kind: Budget
+    listKind: BudgetList
+    plural: budgets
+    singular: budget
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: READY
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: SYNCED
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: EXTERNAL-NAME
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: AGE
+      type: date
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: Budget is the Schema for the Budgets API. Manages a GitHub Enterprise
+          Budget.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: BudgetSpec defines the desired state of Budget
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: |-
+                  DeletionPolicy specifies what will happen to the underlying external
+                  when this managed resource is deleted - either "Delete" or "Orphan" the
+                  external resource.
+                  This field is planned to be deprecated in favor of the ManagementPolicies
+                  field in a future release. Currently, both could be set independently and
+                  non-default values would be honored if the feature flag is enabled.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                description: BudgetParameters defines the desired state parameters
+                properties:
+                  budgetAlerting:
+                    description: Alerting configuration for the budget.
+                    properties:
+                      alertRecipients:
+                        description: Login names of the users who will receive alerts.
+                        items:
+                          type: string
+                        type: array
+                      willAlert:
+                        description: |-
+                          Whether alerts are enabled for this budget. Rejected for user-scoped
+                          budgets as alerting is always disabled for them.
+                        type: boolean
+                    required:
+                    - willAlert
+                    type: object
+                  budgetAmount:
+                    description: |-
+                      The budget amount in whole dollars. For license-based products, this
+                      represents the number of licenses.
+                    format: int64
+                    minimum: 0
+                    type: integer
+                  budgetEntityName:
+                    description: |-
+                      The name of the entity (organization, repository, or cost center) the
+                      budget applies to. Leave empty for enterprise-scoped and
+                      multi_user_customer-scoped budgets.
+                    type: string
+                  budgetProductSku:
+                    description: A single product or SKU that will be covered by the
+                      budget.
+                    type: string
+                  budgetScope:
+                    description: The scope the budget applies to.
+                    enum:
+                    - enterprise
+                    - organization
+                    - repository
+                    - cost_center
+                    - multi_user_customer
+                    - multi_user_cost_center
+                    - user
+                    type: string
+                  budgetType:
+                    description: The pricing model used by the budget. Determines
+                      how budgetProductSku is interpreted.
+                    enum:
+                    - BundlePricing
+                    - ProductPricing
+                    - SkuPricing
+                    type: string
+                  enterprise:
+                    description: The name of the enterprise
+                    type: string
+                  expiresAt:
+                    description: |-
+                      The date the budget will expire, in YYYY-MM-DD format. Only supported
+                      for budgets with a user scope. If not provided, the budget will not expire.
+                    type: string
+                  preventFurtherUsage:
+                    description: |-
+                      Whether to prevent additional spending once the budget is exceeded.
+                      For user and multi_user_customer scopes, this must be true.
+                    type: boolean
+                  user:
+                    description: The GitHub username the budget applies to. Required
+                      when budgetScope is user.
+                    type: string
+                required:
+                - budgetAlerting
+                - budgetAmount
+                - budgetScope
+                - budgetType
+                - enterprise
+                - preventFurtherUsage
+                type: object
+              managementPolicies:
+                default:
+                - '*'
+                description: |-
+                  THIS IS A BETA FIELD. It is on by default but can be opted out
+                  through a Crossplane feature flag.
+                  ManagementPolicies specify the array of actions Crossplane is allowed to
+                  take on the managed and external resources.
+                  This field is planned to replace the DeletionPolicy field in a future
+                  release. Currently, both could be set independently and non-default
+                  values would be honored if the feature flag is enabled. If both are
+                  custom, the DeletionPolicy field will be ignored.
+                  See the design doc for more information: https://github.com/crossplane/crossplane/blob/499895a25d1a1a0ba1604944ef98ac7a1a71f197/design/design-doc-observe-only-resources.md?plain=1#L223
+                  and this one: https://github.com/crossplane/crossplane/blob/444267e84783136daa93568b364a5f01228cacbe/design/one-pager-ignore-changes.md
+                items:
+                  description: |-
+                    A ManagementAction represents an action that the Crossplane controllers
+                    can take on an external resource.
+                  enum:
+                  - Observe
+                  - Create
+                  - Update
+                  - Delete
+                  - LateInitialize
+                  - '*'
+                  type: string
+                type: array
+              providerConfigRef:
+                default:
+                  name: default
+                description: |-
+                  ProviderConfigReference specifies how the provider that will be used to
+                  create, observe, update, and delete this managed resource should be
+                  configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: |-
+                          Resolution specifies whether resolution of this reference is required.
+                          The default is 'Required', which means the reconcile will fail if the
+                          reference cannot be resolved. 'Optional' means this reference will be
+                          a no-op if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: |-
+                          Resolve specifies when this reference should be resolved. The default
+                          is 'IfNotPresent', which will attempt to resolve the reference only when
+                          the corresponding field is not present. Use 'Always' to resolve the
+                          reference on every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: |-
+                  WriteConnectionSecretToReference specifies the namespace and name of a
+                  Secret to which any connection details for this managed resource should
+                  be written. Connection details frequently include the endpoint, username,
+                  and password required to connect to the managed resource.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: BudgetStatus defines the observed state of Budget
+            properties:
+              atProvider:
+                description: BudgetObservation defines the observed state of Budget
+                properties:
+                  budgetAlerting:
+                    description: The alerting configuration reported by GitHub for
+                      this budget
+                    properties:
+                      alertRecipients:
+                        description: Login names of the users who will receive alerts.
+                        items:
+                          type: string
+                        type: array
+                      willAlert:
+                        description: Whether alerts are enabled for this budget.
+                        type: boolean
+                    type: object
+                  consumedAmount:
+                    description: The amount consumed against this budget so far
+                    type: number
+                  id:
+                    description: The unique identifier of the budget
+                    type: string
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        LastTransitionTime is the last time this condition transitioned from one
+                        status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        A Message containing details about this condition's last transition from
+                        one status to another, if any.
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        ObservedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      type: integer
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: |-
+                        Type of this condition. At most one of each condition type may apply to
+                        a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
+              observedGeneration:
+                description: |-
+                  ObservedGeneration is the latest metadata.generation
+                  which resulted in either a ready state, or stalled due to error
+                  it can not recover from without human intervention.
+                format: int64
+                type: integer
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

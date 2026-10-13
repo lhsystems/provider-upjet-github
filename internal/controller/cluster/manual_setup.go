@@ -9,6 +9,7 @@ import (
 
 	"github.com/crossplane/upjet/v2/pkg/controller"
 
+	budget "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/enterprise/budget"
 	costcenter "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/enterprise/costcenter"
 )
 
@@ -17,6 +18,7 @@ import (
 func SetupManual(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
 		costcenter.Setup,
+		budget.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
