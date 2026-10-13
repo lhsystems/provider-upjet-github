@@ -1,0 +1,21 @@
+apiVersion: enterprise.github.upbound.io/v1alpha1
+kind: Budget
+metadata:
+  annotations:
+    meta.upbound.io/example-id: enterprise/v1alpha1/budget
+  labels:
+    testing.upbound.io/example-name: test-budget
+  name: test-budget
+spec:
+  forProvider:
+    enterprise: lhg
+    budgetScope: enterprise
+    budgetType: ProductPricing
+    budgetProductSku: actions
+    budgetAmount: 100
+    preventFurtherUsage: true
+    budgetAlerting:
+      willAlert: false
+      alertRecipients: []
+  providerConfigRef:
+    name: default

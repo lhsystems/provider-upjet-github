@@ -1,0 +1,20 @@
+apiVersion: enterprise.github.m.upbound.io/v1alpha1
+kind: Budget
+metadata:
+  name: example-budget
+  namespace: default
+spec:
+  forProvider:
+    enterprise: example-enterprise
+    budgetScope: organization
+    budgetEntityName: example-org
+    budgetType: ProductPricing
+    budgetProductSku: actions
+    budgetAmount: 500
+    preventFurtherUsage: true
+    budgetAlerting:
+      willAlert: true
+      alertRecipients:
+        - octocat
+  providerConfigRef:
+    name: default
