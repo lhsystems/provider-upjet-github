@@ -565,7 +565,9 @@ func (r *DirectBudgetReconciler) handleDeletion(ctx context.Context, budget *v1a
 		return ctrl.Result{}, nil
 	}
 
-	if allows(budget, xpv1.ManagementActionDelete) {
+	// Nothing to delete externally if the budget was never successfully
+	// created (e.g. Create kept failing), so skip straight to finalizer removal.
+	if budget.Status.AtProvider.ID != nil && allows(budget, xpv1.ManagementActionDelete) {
 		externalClient, err := r.getExternalClient(ctx, budget)
 		if err != nil {
 			r.Logger.Info("Failed to create external client for deletion", "error", err)
