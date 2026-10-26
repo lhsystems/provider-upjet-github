@@ -22,7 +22,10 @@ import (
 	clustercc "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/enterprise/budget"
 )
 
-const testNamespace = "team-a"
+const (
+	testNamespace  = "team-a"
+	testBudgetName = "budget"
+)
 
 func TestProviderConfigRejectsUnsupportedKind(t *testing.T) {
 	for _, kind := range []string{"", "ClusterProviderConfig", "Secret"} {
@@ -46,7 +49,7 @@ func TestReportReconcileErrorSetsSyncedCondition(t *testing.T) {
 	}
 
 	cr := &enterprise.Budget{}
-	cr.Name = "budget"
+	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	kubeClient := fake.NewClientBuilder().
 		WithScheme(scheme).
@@ -93,7 +96,7 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	pc.Spec.Credentials.Source = xpv1.CredentialsSource("None")
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc).Build()
 	cr := &enterprise.Budget{}
-	cr.Name = "budget"
+	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
 
@@ -119,7 +122,7 @@ func TestDeleteRetainsFinalizerWhenProviderConfigUnavailable(t *testing.T) {
 	}
 
 	cr := &enterprise.Budget{}
-	cr.Name = "budget"
+	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.Finalizers = []string{finalizer}
 	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
@@ -150,7 +153,7 @@ func TestProviderConfigUsageTracking(t *testing.T) {
 	cr := &enterprise.Budget{}
 	cr.APIVersion = enterprise.CRDGroupVersion.String()
 	cr.Kind = enterprise.BudgetKind
-	cr.Name = "budget"
+	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.UID = types.UID("budget-uid")
 	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
@@ -192,7 +195,7 @@ func TestServiceUsesBudgetNamespaceForCredentialSecret(t *testing.T) {
 	secret.Namespace = testNamespace
 	secret.Data = map[string][]byte{"credentials": []byte(`{"token":"token"}`)}
 	cr := &enterprise.Budget{}
-	cr.Name = "budget"
+	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
 
