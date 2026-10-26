@@ -217,7 +217,7 @@ func (s *gitHubService) CreateBudget(ctx context.Context, enterprise string, bud
 
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		bodyBytes = []byte("failed to read response body")
+		return nil, fmt.Errorf("failed to read GitHub API response body (%s): %w", resp.Status, err)
 	}
 
 	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {

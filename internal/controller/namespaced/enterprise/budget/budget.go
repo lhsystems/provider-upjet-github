@@ -84,9 +84,23 @@ func (r *reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Resu
 
 	service, err := r.service(ctx, &cr)
 	if err != nil {
-		return ctrl.Result{RequeueAfter: time.Minute}, err
+		return ctrl.Result{RequeueAfter: time.Minute}, r.reportReconcileError(ctx, &cr, err)
 	}
-	return r.reconcileExternal(ctx, &cr, service)
+	result, err := r.reconcileExternal(ctx, &cr, service)
+	if err != nil {
+		return result, r.reportReconcileError(ctx, &cr, err)
+	}
+	return result, nil
+}
+
+func (r *reconciler) reportReconcileError(ctx context.Context, cr *v1alpha1.Budget, reconcileErr error) error {
+	r.recorder.Event(cr, event.Warning("ReconcileError", reconcileErr))
+	cr.Status.SetConditions(xpv1.ReconcileError(reconcileErr))
+	if err := r.Status().Update(ctx, cr); err != nil {
+		r.Logger.Info("Failed to record Budget reconciliation error in status", "error", err)
+		return errors.Wrapf(reconcileErr, "failed to update Budget error status: %v", err)
+	}
+	return reconcileErr
 }
 
 func (r *reconciler) reconcileExternal(ctx context.Context, cr *v1alpha1.Budget, service clustercc.GitHubService) (ctrl.Result, error) {

@@ -61,8 +61,9 @@ type BudgetParameters struct {
 	// +kubebuilder:validation:Enum=enterprise;organization;repository;cost_center;multi_user_customer;multi_user_cost_center;user
 	BudgetScope *string `json:"budgetScope"`
 
-	// The name of the entity (organization, repository, or cost center) the
-	// budget applies to. Leave empty for enterprise-scoped and
+	// The name of the entity (organization or repository) the budget applies
+	// to. For cost_center and multi_user_cost_center budgets, use the cost
+	// center UUID, not its display name. Leave empty for enterprise-scoped and
 	// multi_user_customer-scoped budgets.
 	BudgetEntityName *string `json:"budgetEntityName,omitempty"`
 

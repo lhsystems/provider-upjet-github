@@ -2,14 +2,17 @@ package budget
 
 import (
 	"context"
+	"errors"
 	"strings"
 	"testing"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
+	"github.com/crossplane/crossplane-runtime/v2/pkg/event"
 	"github.com/crossplane/crossplane-runtime/v2/pkg/resource"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 
@@ -34,6 +37,48 @@ func TestProviderConfigRejectsUnsupportedKind(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReportReconcileErrorSetsSyncedCondition(t *testing.T) {
+	scheme := runtime.NewScheme()
+	if err := namespaced.AddToScheme(scheme); err != nil {
+		t.Fatalf("AddToScheme() error = %v", err)
+	}
+
+	cr := &enterprise.Budget{}
+	cr.Name = "budget"
+	cr.Namespace = testNamespace
+	kubeClient := fake.NewClientBuilder().
+		WithScheme(scheme).
+		WithStatusSubresource(&enterprise.Budget{}).
+		WithObjects(cr).
+		Build()
+	r := &reconciler{
+		Client:   kubeClient,
+		recorder: event.NewAPIRecorder(record.NewFakeRecorder(1)),
+	}
+	reconcileErr := errors.New("GitHub API error: 422 Unprocessable Entity - invalid budget scope")
+
+	if err := r.reportReconcileError(context.Background(), cr, reconcileErr); err == nil || !strings.Contains(err.Error(), reconcileErr.Error()) {
+		t.Fatalf("reportReconcileError() error = %v, want original reconciliation error", err)
+	}
+
+	var got enterprise.Budget
+	if err := kubeClient.Get(context.Background(), client.ObjectKeyFromObject(cr), &got); err != nil {
+		t.Fatalf("Get() error = %v", err)
+	}
+	for _, condition := range got.Status.Conditions {
+		if string(condition.Type) == "Synced" {
+			if string(condition.Status) != "False" {
+				t.Fatalf("Synced status = %q, want False", condition.Status)
+			}
+			if !strings.Contains(condition.Message, reconcileErr.Error()) {
+				t.Fatalf("Synced message = %q, want it to contain %q", condition.Message, reconcileErr.Error())
+			}
+			return
+		}
+	}
+	t.Fatal("Synced condition not found")
 }
 
 func TestServiceUsesNamespacedProviderConfig(t *testing.T) {

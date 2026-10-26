@@ -72,6 +72,9 @@ spec:
                     minimum: 0
                     type: integer
                   budgetEntityName:
+                    description: |-
+                      Entity name for organization or repository budgets. For cost_center and
+                      multi_user_cost_center budgets, use the cost center UUID, not its display name.
                     type: string
                   budgetProductSku:
                     type: string
@@ -98,6 +101,8 @@ spec:
                   preventFurtherUsage:
                     type: boolean
                   user:
+                    description: The GitHub username the budget applies to. Required
+                      when budgetScope is user.
                     type: string
                 required:
                 - budgetAlerting

@@ -36,9 +36,12 @@ type BudgetObservation struct {
 type BudgetParameters struct {
 	Enterprise *string `json:"enterprise"`
 	// +kubebuilder:validation:Enum=enterprise;organization;repository;cost_center;multi_user_customer;multi_user_cost_center;user
-	BudgetScope      *string `json:"budgetScope"`
+	BudgetScope *string `json:"budgetScope"`
+	// Entity name for organization or repository budgets. For cost_center and
+	// multi_user_cost_center budgets, use the cost center UUID, not its display name.
 	BudgetEntityName *string `json:"budgetEntityName,omitempty"`
-	User             *string `json:"user,omitempty"`
+	// The GitHub username the budget applies to. Required when budgetScope is user.
+	User *string `json:"user,omitempty"`
 	// +kubebuilder:validation:Enum=BundlePricing;ProductPricing;SkuPricing
 	BudgetType       *string `json:"budgetType"`
 	BudgetProductSKU *string `json:"budgetProductSku,omitempty"`
