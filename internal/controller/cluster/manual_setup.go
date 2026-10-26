@@ -26,3 +26,17 @@ func SetupManual(mgr ctrl.Manager, o controller.Options) error {
 	}
 	return nil
 }
+
+// SetupManualGated sets up manually implemented controllers after their CRDs
+// have been established.
+func SetupManualGated(mgr ctrl.Manager, o controller.Options) error {
+	for _, setup := range []func(ctrl.Manager, controller.Options) error{
+		costcenter.SetupGated,
+		budget.SetupGated,
+	} {
+		if err := setup(mgr, o); err != nil {
+			return err
+		}
+	}
+	return nil
+}

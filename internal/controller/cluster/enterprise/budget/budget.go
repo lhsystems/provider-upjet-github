@@ -38,6 +38,16 @@ const (
 	finalizer    = "finalizer.managedresource.crossplane.io"
 )
 
+// SetupGated adds the Budget controller after its CRD has been established.
+func SetupGated(mgr ctrl.Manager, o controller.Options) error {
+	o.Gate.Register(func() {
+		if err := Setup(mgr, o); err != nil {
+			mgr.GetLogger().Error(err, "unable to setup reconciler", "gvk", v1alpha1.BudgetGroupVersionKind.String())
+		}
+	}, v1alpha1.BudgetGroupVersionKind)
+	return nil
+}
+
 // Setup adds a controller that reconciles Budget managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := "budget-direct"

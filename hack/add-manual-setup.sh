@@ -16,21 +16,19 @@ add_manual_setup() {
         return 0
     fi
 
-    if grep -q "SetupManual" "$setup_file"; then
-        echo "Manual setup already exists in $setup_file"
-        return 0
-    fi
-
     local temp_file
     temp_file=$(mktemp)
 
     awk -v namespaced_setup_file="$NAMESPACED_SETUP_FILE" -v setup_file="$setup_file" '
+    /\/\/ MANUAL CONTROLLER SETUP - DO NOT REMOVE/ { skip_manual = 1; next }
+    /\/\/ END MANUAL CONTROLLER SETUP/ { skip_manual = 0; next }
+    skip_manual { next }
     /^func Setup\(/ { in_setup = 1; in_setupgated = 0 }
     /^func SetupGated\(/ { in_setupgated = 1; in_setup = 0 }
     /^func / && !/^func Setup\(/ && !/^func SetupGated\(/ { in_setup = 0; in_setupgated = 0 }
     /^\treturn nil$/ && (in_setup || in_setupgated) {
         manual_setup = "SetupManual"
-        if (in_setupgated && setup_file == namespaced_setup_file) {
+        if (in_setupgated) {
             manual_setup = "SetupManualGated"
         }
         print ""
