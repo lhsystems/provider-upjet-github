@@ -290,6 +290,9 @@ func (r *reconciler) providerConfig(ctx context.Context, cr *v1alpha1.Budget) (*
 	if ref == nil || ref.Name == "" {
 		return nil, errors.New("ProviderConfig reference is required")
 	}
+	if ref.Kind != "ProviderConfig" {
+		return nil, errors.Errorf("unsupported ProviderConfig reference kind %q: expected ProviderConfig", ref.Kind)
+	}
 	pc := &apisv1beta1.ProviderConfig{}
 	if err := r.Get(ctx, types.NamespacedName{Name: ref.Name, Namespace: cr.Namespace}, pc); err != nil {
 		return nil, errors.Wrap(err, "cannot get ProviderConfig")

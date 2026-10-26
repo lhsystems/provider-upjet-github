@@ -2,6 +2,7 @@ package budget
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/v2/apis/common/v1"
@@ -19,6 +20,21 @@ import (
 )
 
 const testNamespace = "team-a"
+
+func TestProviderConfigRejectsUnsupportedKind(t *testing.T) {
+	for _, kind := range []string{"", "ClusterProviderConfig", "Secret"} {
+		t.Run(kind, func(t *testing.T) {
+			cr := &enterprise.Budget{}
+			cr.Namespace = testNamespace
+			cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: kind, Name: "github"}
+			r := &reconciler{}
+
+			if _, err := r.providerConfig(context.Background(), cr); err == nil || !strings.Contains(err.Error(), "unsupported ProviderConfig reference kind") {
+				t.Fatalf("providerConfig() error = %v, want unsupported kind error", err)
+			}
+		})
+	}
+}
 
 func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	scheme := runtime.NewScheme()

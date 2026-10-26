@@ -17,4 +17,5 @@ spec:
       alertRecipients:
         - octocat
   providerConfigRef:
+    kind: ProviderConfig
     name: default
