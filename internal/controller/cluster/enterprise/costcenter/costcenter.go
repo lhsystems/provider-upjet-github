@@ -41,6 +41,16 @@ const (
 	errDeleteCostCenter = "cannot delete cost center"
 )
 
+// SetupGated adds the CostCenter controller after its CRD has been established.
+func SetupGated(mgr ctrl.Manager, o controller.Options) error {
+	o.Gate.Register(func() {
+		if err := Setup(mgr, o); err != nil {
+			mgr.GetLogger().Error(err, "unable to setup reconciler", "gvk", v1alpha1.CostCenterGroupVersionKind.String())
+		}
+	}, v1alpha1.CostCenterGroupVersionKind)
+	return nil
+}
+
 // Setup adds a controller that reconciles CostCenter managed resources.
 func Setup(mgr ctrl.Manager, o controller.Options) error {
 	name := "costcenter-direct"

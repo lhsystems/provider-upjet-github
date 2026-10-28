@@ -9,6 +9,7 @@ import (
 
 	"github.com/crossplane/upjet/v2/pkg/controller"
 
+	budget "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/enterprise/budget"
 	costcenter "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/enterprise/costcenter"
 )
 
@@ -17,6 +18,7 @@ import (
 func SetupManual(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
 		costcenter.Setup,
+		budget.Setup,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
@@ -30,6 +32,7 @@ func SetupManual(mgr ctrl.Manager, o controller.Options) error {
 func SetupManualGated(mgr ctrl.Manager, o controller.Options) error {
 	for _, setup := range []func(ctrl.Manager, controller.Options) error{
 		costcenter.SetupGated,
+		budget.SetupGated,
 	} {
 		if err := setup(mgr, o); err != nil {
 			return err
