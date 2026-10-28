@@ -25,7 +25,10 @@ import (
 	"github.com/crossplane/upjet/v2/pkg/controller"
 )
 
-const finalizer = "finalizer.managedresource.crossplane.io"
+const (
+	finalizer          = "finalizer.managedresource.crossplane.io"
+	providerConfigKind = "ProviderConfig"
+)
 
 // SetupGated adds a controller for Budget that is registered once its CRD has been established.
 func SetupGated(mgr ctrl.Manager, o controller.Options) error {
@@ -304,7 +307,7 @@ func (r *reconciler) providerConfig(ctx context.Context, cr *v1alpha1.Budget) (*
 	if ref == nil || ref.Name == "" {
 		return nil, errors.New("ProviderConfig reference is required")
 	}
-	if ref.Kind != "ProviderConfig" {
+	if ref.Kind != providerConfigKind {
 		return nil, errors.Errorf("unsupported ProviderConfig reference kind %q: expected ProviderConfig", ref.Kind)
 	}
 	pc := &apisv1beta1.ProviderConfig{}

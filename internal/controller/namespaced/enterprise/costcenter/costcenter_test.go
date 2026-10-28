@@ -18,7 +18,11 @@ import (
 	clustercc "github.com/crossplane-contrib/provider-upjet-github/internal/controller/cluster/enterprise/costcenter"
 )
 
-const testNamespace = "team-a"
+const (
+	testNamespace          = "team-a"
+	testProviderConfigName = "github"
+	testProviderConfigKind = "ProviderConfig"
+)
 
 func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	scheme := runtime.NewScheme()
@@ -27,14 +31,14 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	}
 
 	pc := &providerconfig.ProviderConfig{}
-	pc.Name = "github"
+	pc.Name = testProviderConfigName
 	pc.Namespace = testNamespace
 	pc.Spec.Credentials.Source = xpv1.CredentialsSource("None")
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc).Build()
 	cr := &enterprise.CostCenter{}
 	cr.Name = "cost-center"
 	cr.Namespace = testNamespace
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: testProviderConfigKind, Name: testProviderConfigName}
 
 	r := &reconciler{
 		Client: kubeClient,
@@ -61,7 +65,7 @@ func TestDeleteRetainsFinalizerWhenProviderConfigUnavailable(t *testing.T) {
 	cr.Name = "cost-center"
 	cr.Namespace = testNamespace
 	cr.Finalizers = []string{finalizer}
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: testProviderConfigKind, Name: testProviderConfigName}
 	cr.Status.AtProvider.ID = func() *string { value := "cost-center-id"; return &value }()
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cr).Build()
@@ -92,7 +96,7 @@ func TestProviderConfigUsageTracking(t *testing.T) {
 	cr.Name = "cost-center"
 	cr.Namespace = testNamespace
 	cr.UID = types.UID("cost-center-uid")
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: testProviderConfigKind, Name: testProviderConfigName}
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 	tracker := resource.NewProviderConfigUsageTracker(kubeClient, &providerconfig.ProviderConfigUsage{})
@@ -104,7 +108,7 @@ func TestProviderConfigUsageTracking(t *testing.T) {
 	if err := kubeClient.Get(context.Background(), client.ObjectKey{Name: string(cr.UID), Namespace: cr.Namespace}, usage); err != nil {
 		t.Fatalf("Get() error = %v", err)
 	}
-	if got := usage.GetProviderConfigReference(); got.Name != "github" || got.Kind != "ProviderConfig" {
+	if got := usage.GetProviderConfigReference(); got.Name != testProviderConfigName || got.Kind != testProviderConfigKind {
 		t.Fatalf("ProviderConfigReference = %#v, want ProviderConfig/github", got)
 	}
 }
@@ -119,7 +123,7 @@ func TestServiceUsesCostCenterNamespaceForCredentialSecret(t *testing.T) {
 	}
 
 	pc := &providerconfig.ProviderConfig{}
-	pc.Name = "github"
+	pc.Name = testProviderConfigName
 	pc.Namespace = testNamespace
 	pc.Spec.Credentials.Source = xpv1.CredentialsSourceSecret
 	pc.Spec.Credentials.SecretRef = &xpv1.SecretKeySelector{
@@ -133,7 +137,7 @@ func TestServiceUsesCostCenterNamespaceForCredentialSecret(t *testing.T) {
 	cr := &enterprise.CostCenter{}
 	cr.Name = "cost-center"
 	cr.Namespace = testNamespace
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: testProviderConfigKind, Name: testProviderConfigName}
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc, secret).Build()
 	r := &reconciler{
