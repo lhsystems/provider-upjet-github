@@ -530,11 +530,23 @@ spec:
                     type: string
                   id:
                     type: string
+                  policyId:
+                    description: |-
+                      The ID of the deployment policy.
+                      The ID of the deployment policy.
+                    format: int64
+                    type: integer
                   repository:
                     description: |-
                       The repository of the environment.
                       The name of the GitHub repository.
                     type: string
+                  repositoryId:
+                    description: |-
+                      The ID of the repository.
+                      The ID of the GitHub repository.
+                    format: int64
+                    type: integer
                   tagPattern:
                     description: |-
                       The name pattern that tags must match in order to deploy to the environment. If not specified, branch_pattern must be specified.

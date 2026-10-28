@@ -77,12 +77,12 @@ type BranchNamePatternParameters struct {
 
 type BypassActorsInitParameters struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. If actor_type is User, actor_id is the numeric GitHub user ID. Some actor types such as OrganizationAdmin, EnterpriseOwner, and DeployKey do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
+	// The ID of the actor that can bypass a ruleset. If `actor_type` is `Integration`, `actor_id` is a GitHub App ID. When `actor_type` is `User`, this should be set to the numeric GitHub user ID. Some actor types such as `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey.
-	// The type of actor that can bypass a ruleset. See https://docs.github.com/en/rest/repos/rules for more information.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner, User.
+	// The type of actor that can bypass a ruleset. Can be one of: `RepositoryRole`, `Team`, `Integration`, `OrganizationAdmin`, `DeployKey`, `EnterpriseOwner`, or `User`. See https://docs.github.com/en/rest/repos/rules for more information.
 	ActorType *string `json:"actorType,omitempty" tf:"actor_type,omitempty"`
 
 	// (String) When the specified actor can bypass the ruleset. pull_request means that an actor can only bypass rules on pull requests. Can be one of: always, pull_request, exempt.
@@ -92,12 +92,12 @@ type BypassActorsInitParameters struct {
 
 type BypassActorsObservation struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. If actor_type is User, actor_id is the numeric GitHub user ID. Some actor types such as OrganizationAdmin, EnterpriseOwner, and DeployKey do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
+	// The ID of the actor that can bypass a ruleset. If `actor_type` is `Integration`, `actor_id` is a GitHub App ID. When `actor_type` is `User`, this should be set to the numeric GitHub user ID. Some actor types such as `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey.
-	// The type of actor that can bypass a ruleset. See https://docs.github.com/en/rest/repos/rules for more information.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner, User.
+	// The type of actor that can bypass a ruleset. Can be one of: `RepositoryRole`, `Team`, `Integration`, `OrganizationAdmin`, `DeployKey`, `EnterpriseOwner`, or `User`. See https://docs.github.com/en/rest/repos/rules for more information.
 	ActorType *string `json:"actorType,omitempty" tf:"actor_type,omitempty"`
 
 	// (String) When the specified actor can bypass the ruleset. pull_request means that an actor can only bypass rules on pull requests. Can be one of: always, pull_request, exempt.
@@ -107,13 +107,13 @@ type BypassActorsObservation struct {
 
 type BypassActorsParameters struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. If actor_type is Integration, actor_id is a GitHub App ID. App ID can be obtained by following instructions from the Get an App API docs. If actor_type is User, actor_id is the numeric GitHub user ID. Some actor types such as OrganizationAdmin, EnterpriseOwner, and DeployKey do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
+	// The ID of the actor that can bypass a ruleset. If `actor_type` is `Integration`, `actor_id` is a GitHub App ID. When `actor_type` is `User`, this should be set to the numeric GitHub user ID. Some actor types such as `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` do not have an ID — this argument should not be set in those cases as the GitHub API will ignore it.
 	// +kubebuilder:validation:Optional
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey.
-	// The type of actor that can bypass a ruleset. See https://docs.github.com/en/rest/repos/rules for more information.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner, User.
+	// The type of actor that can bypass a ruleset. Can be one of: `RepositoryRole`, `Team`, `Integration`, `OrganizationAdmin`, `DeployKey`, `EnterpriseOwner`, or `User`. See https://docs.github.com/en/rest/repos/rules for more information.
 	// +kubebuilder:validation:Optional
 	ActorType *string `json:"actorType" tf:"actor_type,omitempty"`
 

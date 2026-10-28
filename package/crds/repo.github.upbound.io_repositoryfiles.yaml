@@ -90,8 +90,7 @@ spec:
                     type: string
                   branch:
                     description: |-
-                      Git branch (defaults to the repository's default branch).
-                      The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
+                      Git branch (defaults to the repository's default branch). The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
                       The branch name, defaults to the repository's default branch
                     type: string
                   branchRef:
@@ -308,8 +307,7 @@ spec:
                     type: string
                   branch:
                     description: |-
-                      Git branch (defaults to the repository's default branch).
-                      The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
+                      Git branch (defaults to the repository's default branch). The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
                       The branch name, defaults to the repository's default branch
                     type: string
                   branchRef:
@@ -613,8 +611,7 @@ spec:
                     type: string
                   branch:
                     description: |-
-                      Git branch (defaults to the repository's default branch).
-                      The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
+                      Git branch (defaults to the repository's default branch). The branch must already exist, it will only be created automatically if 'autocreate_branch' is set true.
                       The branch name, defaults to the repository's default branch
                     type: string
                   commitAuthor:

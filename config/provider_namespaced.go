@@ -22,12 +22,14 @@ import (
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsrepositorypermissions"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionssecret"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/actionsvariable"
+	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/appinstallationrepositories"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/branch"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/branchdefault"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/branchprotection"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/branchprotectionv3"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/emugroupmapping"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/enterpriseorganization"
+	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/githubissue"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/issuelabels"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/membership"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/organizationcustomproperties"
@@ -37,6 +39,7 @@ import (
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repository"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositoryautolinkreference"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositorycollaborator"
+	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositorycollaborators"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositorycustomproperty"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositorydeploykey"
 	"github.com/crossplane-contrib/provider-upjet-github/config/namespaced/repositoryenvironment"
@@ -65,7 +68,7 @@ func GetProviderNamespaced(ctx context.Context) (*ujconfig.Provider, error) {
 		ujconfig.WithTerraformPluginSDKIncludeList(resourceList(terraformPluginSDKExternalNameConfigs)),
 		ujconfig.WithFeaturesPackage("internal/features"),
 		ujconfig.WithReferenceInjectors([]ujconfig.ReferenceInjector{reference.NewInjector(modulePath)}),
-		ujconfig.WithTerraformProvider(github.Provider()),
+		ujconfig.WithTerraformProvider(github.NewProvider("dev", "none")()),
 		ujconfig.WithDefaultResourceOptions(
 			resourceConfigurator(),
 		))
@@ -83,12 +86,14 @@ func GetProviderNamespaced(ctx context.Context) (*ujconfig.Provider, error) {
 		actionsrepositorypermissions.Configure,
 		actionssecret.Configure,
 		actionsvariable.Configure,
+		appinstallationrepositories.Configure,
 		branch.Configure,
 		branchdefault.Configure,
 		branchprotection.Configure,
 		branchprotectionv3.Configure,
 		emugroupmapping.Configure,
 		enterpriseorganization.Configure,
+		githubissue.Configure,
 		issuelabels.Configure,
 		membership.Configure,
 		organizationcustomproperties.Configure,
@@ -98,6 +103,7 @@ func GetProviderNamespaced(ctx context.Context) (*ujconfig.Provider, error) {
 		repository.Configure,
 		repositoryautolinkreference.Configure,
 		repositorycollaborator.Configure,
+		repositorycollaborators.Configure,
 		repositorycustomproperty.Configure,
 		repositorydeploykey.Configure,
 		repositoryenvironmentdeploymentpolicy.Configure,

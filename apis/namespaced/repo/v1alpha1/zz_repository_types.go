@@ -87,7 +87,7 @@ type PagesObservation struct {
 	// Whether the rendered GitHub Pages site has a custom 404 page
 	Custom404 *bool `json:"custom404,omitempty" tf:"custom_404,omitempty"`
 
-	// URL to the repository on the web.
+	// The absolute URL (including scheme) of the rendered GitHub Pages site e.g. https://username.github.io.
 	// URL to the repository on the web.
 	HTMLURL *string `json:"htmlUrl,omitempty" tf:"html_url,omitempty"`
 
@@ -95,7 +95,7 @@ type PagesObservation struct {
 	// The source branch and directory for the rendered Pages site.
 	Source []SourceObservation `json:"source,omitempty" tf:"source,omitempty"`
 
-	// Set to enabled to enable GitHub Code Security on the repository. Can be enabled or disabled. If set to enabled, the repository's visibility must be public, security_and_analysis[0].advanced_security[0].status must also be set to enabled, or your Organization must have split licensing for Advanced security.
+	// The GitHub Pages site's build status e.g. building or built.
 	// The GitHub Pages site's build status e.g. building or built.
 	Status *string `json:"status,omitempty" tf:"status,omitempty"`
 
@@ -158,9 +158,7 @@ type RepositoryInitParameters struct {
 	// Set to 'true' to produce an initial commit in the repository.
 	AutoInit *bool `json:"autoInit,omitempty" tf:"auto_init,omitempty"`
 
-	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created,
-	// and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the
-	// initial repository creation and create the target branch inside of the repository prior to setting this attribute.
+	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created, and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the initial repository creation and create the target branch inside of the repository prior to setting this attribute.
 	// Can only be set after initial repository creation, and only if the target branch exists
 	DefaultBranch *string `json:"defaultBranch,omitempty" tf:"default_branch,omitempty"`
 
@@ -190,8 +188,7 @@ type RepositoryInitParameters struct {
 	// Set to 'true' to enable the (deprecated) downloads features on the repository.
 	HasDownloads *bool `json:"hasDownloads,omitempty" tf:"has_downloads,omitempty"`
 
-	// Set to true to enable the GitHub Issues features
-	// on the repository.
+	// Set to true to enable the GitHub Issues features on the repository.
 	// Set to 'true' to enable the GitHub Issues features on the repository
 	HasIssues *bool `json:"hasIssues,omitempty" tf:"has_issues,omitempty"`
 
@@ -199,8 +196,7 @@ type RepositoryInitParameters struct {
 	// Set to 'true' to enable the GitHub Projects features on the repository. Per the GitHub documentation when in an organization that has disabled repository projects it will default to 'false' and will otherwise default to 'true'. If you specify 'true' when it has been disabled it will return an error.
 	HasProjects *bool `json:"hasProjects,omitempty" tf:"has_projects,omitempty"`
 
-	// Set to true to enable the GitHub Wiki features on
-	// the repository.
+	// Set to true to enable the GitHub Wiki features on the repository.
 	// Set to 'true' to enable the GitHub Wiki features on the repository.
 	HasWiki *bool `json:"hasWiki,omitempty" tf:"has_wiki,omitempty"`
 
@@ -208,7 +204,7 @@ type RepositoryInitParameters struct {
 	// URL of a page describing the project.
 	HomepageURL *string `json:"homepageUrl,omitempty" tf:"homepage_url,omitempty"`
 
-	// This is ignored as the provider now handles lack of permissions automatically.
+	// This is ignored as the provider now handles lack of permissions automatically. This field will be removed in a future version.
 	IgnoreVulnerabilityAlertsDuringRead *bool `json:"ignoreVulnerabilityAlertsDuringRead,omitempty" tf:"ignore_vulnerability_alerts_during_read,omitempty"`
 
 	// Set to true to tell GitHub that this is a template repository.
@@ -231,12 +227,11 @@ type RepositoryInitParameters struct {
 	// The name of the repository.
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
-	// The repository's GitHub Pages configuration. See GitHub Pages Configuration below for details.
+	// (DEPRECATED) The repository's GitHub Pages configuration. Use the github_repository_pages resource instead. This field will be removed in a future version. See GitHub Pages Configuration below for details.
 	// The repository's GitHub Pages configuration
 	Pages []PagesInitParameters `json:"pages,omitempty" tf:"pages,omitempty"`
 
-	// Set to true to create a private repository.
-	// Repositories are created as public (e.g. open source) by default.
+	// Set to true to create a private repository. Repositories are created as public (e.g. open source) by default.
 	Private *bool `json:"private,omitempty" tf:"private,omitempty"`
 
 	// The repository's security and analysis configuration. See Security and Analysis Configuration below for details.
@@ -272,12 +267,12 @@ type RepositoryInitParameters struct {
 	// Can be 'public' or 'private'. If your organization is associated with an enterprise account using GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be 'internal'.
 	Visibility *string `json:"visibility,omitempty" tf:"visibility,omitempty"`
 
-	// Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level.
+	// (DEPRECATED) Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level. This field will be removed in a future version. Use the github_repository_vulnerability_alerts resource instead.
 	// Set to 'true' to enable security alerts for vulnerable dependencies. Enabling requires alerts to be enabled on the owner level. (Note for importing: GitHub enables the alerts on all repos by default). Note that vulnerability alerts have not been successfully tested on any GitHub Enterprise instance and may be unavailable in those settings.
 	VulnerabilityAlerts *bool `json:"vulnerabilityAlerts,omitempty" tf:"vulnerability_alerts,omitempty"`
 
-	// Require contributors to sign off on web-based commits. See more here. Defaults to false.
-	// Require contributors to sign off on web-based commits. Defaults to 'false'.
+	// Require contributors to sign off on web-based commits. See more in the GitHub documentation.
+	// Require contributors to sign off on web-based commits.
 	WebCommitSignoffRequired *bool `json:"webCommitSignoffRequired,omitempty" tf:"web_commit_signoff_required,omitempty"`
 }
 
@@ -319,9 +314,7 @@ type RepositoryObservation struct {
 	// Set to 'true' to produce an initial commit in the repository.
 	AutoInit *bool `json:"autoInit,omitempty" tf:"auto_init,omitempty"`
 
-	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created,
-	// and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the
-	// initial repository creation and create the target branch inside of the repository prior to setting this attribute.
+	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created, and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the initial repository creation and create the target branch inside of the repository prior to setting this attribute.
 	// Can only be set after initial repository creation, and only if the target branch exists
 	DefaultBranch *string `json:"defaultBranch,omitempty" tf:"default_branch,omitempty"`
 
@@ -367,8 +360,7 @@ type RepositoryObservation struct {
 	// Set to 'true' to enable the (deprecated) downloads features on the repository.
 	HasDownloads *bool `json:"hasDownloads,omitempty" tf:"has_downloads,omitempty"`
 
-	// Set to true to enable the GitHub Issues features
-	// on the repository.
+	// Set to true to enable the GitHub Issues features on the repository.
 	// Set to 'true' to enable the GitHub Issues features on the repository
 	HasIssues *bool `json:"hasIssues,omitempty" tf:"has_issues,omitempty"`
 
@@ -376,8 +368,7 @@ type RepositoryObservation struct {
 	// Set to 'true' to enable the GitHub Projects features on the repository. Per the GitHub documentation when in an organization that has disabled repository projects it will default to 'false' and will otherwise default to 'true'. If you specify 'true' when it has been disabled it will return an error.
 	HasProjects *bool `json:"hasProjects,omitempty" tf:"has_projects,omitempty"`
 
-	// Set to true to enable the GitHub Wiki features on
-	// the repository.
+	// Set to true to enable the GitHub Wiki features on the repository.
 	// Set to 'true' to enable the GitHub Wiki features on the repository.
 	HasWiki *bool `json:"hasWiki,omitempty" tf:"has_wiki,omitempty"`
 
@@ -387,7 +378,7 @@ type RepositoryObservation struct {
 
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
-	// This is ignored as the provider now handles lack of permissions automatically.
+	// This is ignored as the provider now handles lack of permissions automatically. This field will be removed in a future version.
 	IgnoreVulnerabilityAlertsDuringRead *bool `json:"ignoreVulnerabilityAlertsDuringRead,omitempty" tf:"ignore_vulnerability_alerts_during_read,omitempty"`
 
 	// Set to true to tell GitHub that this is a template repository.
@@ -414,15 +405,14 @@ type RepositoryObservation struct {
 	// GraphQL global node id for use with v4 API.
 	NodeID *string `json:"nodeId,omitempty" tf:"node_id,omitempty"`
 
-	// The repository's GitHub Pages configuration. See GitHub Pages Configuration below for details.
+	// (DEPRECATED) The repository's GitHub Pages configuration. Use the github_repository_pages resource instead. This field will be removed in a future version. See GitHub Pages Configuration below for details.
 	// The repository's GitHub Pages configuration
 	Pages []PagesObservation `json:"pages,omitempty" tf:"pages,omitempty"`
 
 	// The primary language used in the repository.
 	PrimaryLanguage *string `json:"primaryLanguage,omitempty" tf:"primary_language,omitempty"`
 
-	// Set to true to create a private repository.
-	// Repositories are created as public (e.g. open source) by default.
+	// Set to true to create a private repository. Repositories are created as public (e.g. open source) by default.
 	Private *bool `json:"private,omitempty" tf:"private,omitempty"`
 
 	// GitHub ID for the repository
@@ -470,12 +460,12 @@ type RepositoryObservation struct {
 	// Can be 'public' or 'private'. If your organization is associated with an enterprise account using GitHub Enterprise Cloud or GitHub Enterprise Server 2.20+, visibility can also be 'internal'.
 	Visibility *string `json:"visibility,omitempty" tf:"visibility,omitempty"`
 
-	// Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level.
+	// (DEPRECATED) Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level. This field will be removed in a future version. Use the github_repository_vulnerability_alerts resource instead.
 	// Set to 'true' to enable security alerts for vulnerable dependencies. Enabling requires alerts to be enabled on the owner level. (Note for importing: GitHub enables the alerts on all repos by default). Note that vulnerability alerts have not been successfully tested on any GitHub Enterprise instance and may be unavailable in those settings.
 	VulnerabilityAlerts *bool `json:"vulnerabilityAlerts,omitempty" tf:"vulnerability_alerts,omitempty"`
 
-	// Require contributors to sign off on web-based commits. See more here. Defaults to false.
-	// Require contributors to sign off on web-based commits. Defaults to 'false'.
+	// Require contributors to sign off on web-based commits. See more in the GitHub documentation.
+	// Require contributors to sign off on web-based commits.
 	WebCommitSignoffRequired *bool `json:"webCommitSignoffRequired,omitempty" tf:"web_commit_signoff_required,omitempty"`
 }
 
@@ -526,9 +516,7 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	AutoInit *bool `json:"autoInit,omitempty" tf:"auto_init,omitempty"`
 
-	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created,
-	// and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the
-	// initial repository creation and create the target branch inside of the repository prior to setting this attribute.
+	// (Deprecated: Use github_branch_default resource instead) The name of the default branch of the repository. NOTE: This can only be set after a repository has already been created, and after a correct reference has been created for the target branch inside the repository. This means a user will have to omit this parameter from the initial repository creation and create the target branch inside of the repository prior to setting this attribute.
 	// Can only be set after initial repository creation, and only if the target branch exists
 	// +kubebuilder:validation:Optional
 	DefaultBranch *string `json:"defaultBranch,omitempty" tf:"default_branch,omitempty"`
@@ -566,8 +554,7 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	HasDownloads *bool `json:"hasDownloads,omitempty" tf:"has_downloads,omitempty"`
 
-	// Set to true to enable the GitHub Issues features
-	// on the repository.
+	// Set to true to enable the GitHub Issues features on the repository.
 	// Set to 'true' to enable the GitHub Issues features on the repository
 	// +kubebuilder:validation:Optional
 	HasIssues *bool `json:"hasIssues,omitempty" tf:"has_issues,omitempty"`
@@ -577,8 +564,7 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	HasProjects *bool `json:"hasProjects,omitempty" tf:"has_projects,omitempty"`
 
-	// Set to true to enable the GitHub Wiki features on
-	// the repository.
+	// Set to true to enable the GitHub Wiki features on the repository.
 	// Set to 'true' to enable the GitHub Wiki features on the repository.
 	// +kubebuilder:validation:Optional
 	HasWiki *bool `json:"hasWiki,omitempty" tf:"has_wiki,omitempty"`
@@ -588,7 +574,7 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	HomepageURL *string `json:"homepageUrl,omitempty" tf:"homepage_url,omitempty"`
 
-	// This is ignored as the provider now handles lack of permissions automatically.
+	// This is ignored as the provider now handles lack of permissions automatically. This field will be removed in a future version.
 	// +kubebuilder:validation:Optional
 	IgnoreVulnerabilityAlertsDuringRead *bool `json:"ignoreVulnerabilityAlertsDuringRead,omitempty" tf:"ignore_vulnerability_alerts_during_read,omitempty"`
 
@@ -617,13 +603,12 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	Name *string `json:"name,omitempty" tf:"name,omitempty"`
 
-	// The repository's GitHub Pages configuration. See GitHub Pages Configuration below for details.
+	// (DEPRECATED) The repository's GitHub Pages configuration. Use the github_repository_pages resource instead. This field will be removed in a future version. See GitHub Pages Configuration below for details.
 	// The repository's GitHub Pages configuration
 	// +kubebuilder:validation:Optional
 	Pages []PagesParameters `json:"pages,omitempty" tf:"pages,omitempty"`
 
-	// Set to true to create a private repository.
-	// Repositories are created as public (e.g. open source) by default.
+	// Set to true to create a private repository. Repositories are created as public (e.g. open source) by default.
 	// +kubebuilder:validation:Optional
 	Private *bool `json:"private,omitempty" tf:"private,omitempty"`
 
@@ -668,13 +653,13 @@ type RepositoryParameters struct {
 	// +kubebuilder:validation:Optional
 	Visibility *string `json:"visibility,omitempty" tf:"visibility,omitempty"`
 
-	// Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level.
+	// (DEPRECATED) Configure Dependabot security alerts for vulnerable dependencies; set to true to enable, set to false to disable, and leave unset for the default behavior. Configuring this requires that alerts are not being explicitly configured at the organization level. This field will be removed in a future version. Use the github_repository_vulnerability_alerts resource instead.
 	// Set to 'true' to enable security alerts for vulnerable dependencies. Enabling requires alerts to be enabled on the owner level. (Note for importing: GitHub enables the alerts on all repos by default). Note that vulnerability alerts have not been successfully tested on any GitHub Enterprise instance and may be unavailable in those settings.
 	// +kubebuilder:validation:Optional
 	VulnerabilityAlerts *bool `json:"vulnerabilityAlerts,omitempty" tf:"vulnerability_alerts,omitempty"`
 
-	// Require contributors to sign off on web-based commits. See more here. Defaults to false.
-	// Require contributors to sign off on web-based commits. Defaults to 'false'.
+	// Require contributors to sign off on web-based commits. See more in the GitHub documentation.
+	// Require contributors to sign off on web-based commits.
 	// +kubebuilder:validation:Optional
 	WebCommitSignoffRequired *bool `json:"webCommitSignoffRequired,omitempty" tf:"web_commit_signoff_required,omitempty"`
 }

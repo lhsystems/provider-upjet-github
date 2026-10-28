@@ -11,6 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	v1alpha1 "github.com/crossplane-contrib/provider-upjet-github/apis/cluster/actions/v1alpha1"
+	v1alpha1app "github.com/crossplane-contrib/provider-upjet-github/apis/cluster/app/v1alpha1"
 	v1alpha1enterprise "github.com/crossplane-contrib/provider-upjet-github/apis/cluster/enterprise/v1alpha1"
 	v1alpha1organization "github.com/crossplane-contrib/provider-upjet-github/apis/cluster/organization/v1alpha1"
 	v1alpha1repo "github.com/crossplane-contrib/provider-upjet-github/apis/cluster/repo/v1alpha1"
@@ -24,6 +25,7 @@ func init() {
 	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
 	AddToSchemes = append(AddToSchemes,
 		v1alpha1.SchemeBuilder.AddToScheme,
+		v1alpha1app.SchemeBuilder.AddToScheme,
 		v1alpha1enterprise.SchemeBuilder.AddToScheme,
 		v1alpha1organization.SchemeBuilder.AddToScheme,
 		v1alpha1repo.SchemeBuilder.AddToScheme,

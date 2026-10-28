@@ -529,7 +529,7 @@ spec:
                     type: string
                   url:
                     description: |-
-                      URL of the webhook.  This is a sensitive attribute because it may include basic auth credentials.
+                      URL of the webhook. This is a sensitive attribute because it may include basic auth credentials.
                       Configuration block for the webhook
                     type: string
                 type: object

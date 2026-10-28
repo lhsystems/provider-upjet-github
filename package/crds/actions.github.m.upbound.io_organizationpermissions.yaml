@@ -114,8 +114,9 @@ spec:
                       type: object
                     type: array
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in an organization.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
                     type: boolean
                 type: object
               initProvider:
@@ -185,8 +186,9 @@ spec:
                       type: object
                     type: array
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in an organization.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
                     type: boolean
                 type: object
               managementPolicies:
@@ -314,8 +316,9 @@ spec:
                   id:
                     type: string
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in an organization.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
                     type: boolean
                 type: object
               conditions:

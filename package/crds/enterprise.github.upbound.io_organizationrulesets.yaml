@@ -81,14 +81,14 @@ spec:
                       properties:
                         actorId:
                           description: |-
-                            (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-                            The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+                            (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+                            The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
                           format: int64
                           type: integer
                         actorType:
                           description: |-
-                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
                           type: string
                         bypassMode:
                           description: |-
@@ -100,7 +100,7 @@ spec:
                   conditions:
                     description: |-
                       (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-                      Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+                      Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
                     items:
                       properties:
                         refName:
@@ -127,15 +127,15 @@ spec:
                           type: array
                         repositoryId:
                           description: |-
-                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-                            The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
                           items:
                             format: int64
                             type: integer
                           type: array
                         repositoryName:
                           description: |-
-                            (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+                            (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
                             Targets repositories that match the specified name patterns.
                           items:
                             properties:
@@ -158,6 +158,64 @@ spec:
                                   (Boolean) Whether renaming of target repositories is prevented. Defaults to false.
                                   Whether renaming of target repositories is prevented.
                                 type: boolean
+                            type: object
+                          type: array
+                        repositoryProperty:
+                          description: |-
+                            (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+                            Conditions to target repositories by custom or system properties.
+                          items:
+                            properties:
+                              exclude:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+                                  The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
+                              include:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+                                  The repository properties and values to include. All of these properties must match for the condition to pass.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
                             type: object
                           type: array
                       type: object
@@ -640,14 +698,14 @@ spec:
                       properties:
                         actorId:
                           description: |-
-                            (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-                            The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+                            (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+                            The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
                           format: int64
                           type: integer
                         actorType:
                           description: |-
-                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
                           type: string
                         bypassMode:
                           description: |-
@@ -659,7 +717,7 @@ spec:
                   conditions:
                     description: |-
                       (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-                      Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+                      Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
                     items:
                       properties:
                         refName:
@@ -686,15 +744,15 @@ spec:
                           type: array
                         repositoryId:
                           description: |-
-                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-                            The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
                           items:
                             format: int64
                             type: integer
                           type: array
                         repositoryName:
                           description: |-
-                            (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+                            (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
                             Targets repositories that match the specified name patterns.
                           items:
                             properties:
@@ -717,6 +775,64 @@ spec:
                                   (Boolean) Whether renaming of target repositories is prevented. Defaults to false.
                                   Whether renaming of target repositories is prevented.
                                 type: boolean
+                            type: object
+                          type: array
+                        repositoryProperty:
+                          description: |-
+                            (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+                            Conditions to target repositories by custom or system properties.
+                          items:
+                            properties:
+                              exclude:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+                                  The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
+                              include:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+                                  The repository properties and values to include. All of these properties must match for the condition to pass.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
                             type: object
                           type: array
                       type: object
@@ -1294,14 +1410,14 @@ spec:
                       properties:
                         actorId:
                           description: |-
-                            (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-                            The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+                            (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+                            The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
                           format: int64
                           type: integer
                         actorType:
                           description: |-
-                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+                            (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+                            The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
                           type: string
                         bypassMode:
                           description: |-
@@ -1313,7 +1429,7 @@ spec:
                   conditions:
                     description: |-
                       (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-                      Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+                      Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
                     items:
                       properties:
                         refName:
@@ -1340,15 +1456,15 @@ spec:
                           type: array
                         repositoryId:
                           description: |-
-                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-                            The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+                            The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
                           items:
                             format: int64
                             type: integer
                           type: array
                         repositoryName:
                           description: |-
-                            (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+                            (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
                             Targets repositories that match the specified name patterns.
                           items:
                             properties:
@@ -1371,6 +1487,64 @@ spec:
                                   (Boolean) Whether renaming of target repositories is prevented. Defaults to false.
                                   Whether renaming of target repositories is prevented.
                                 type: boolean
+                            type: object
+                          type: array
+                        repositoryProperty:
+                          description: |-
+                            (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+                            Conditions to target repositories by custom or system properties.
+                          items:
+                            properties:
+                              exclude:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+                                  The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
+                              include:
+                                description: |-
+                                  (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+                                  The repository properties and values to include. All of these properties must match for the condition to pass.
+                                items:
+                                  properties:
+                                    name:
+                                      description: |-
+                                        (String) How this rule will appear to users.
+                                        The name of the repository property to target.
+                                      type: string
+                                    propertyValues:
+                                      description: |-
+                                        (Array of String) The values to match for the repository property.
+                                        The values to match for the repository property.
+                                      items:
+                                        type: string
+                                      type: array
+                                    source:
+                                      description: |-
+                                        (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                        The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+                                      type: string
+                                  type: object
+                                type: array
                             type: object
                           type: array
                       type: object

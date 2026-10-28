@@ -95,7 +95,7 @@ spec:
                     type: string
                   notificationSetting:
                     description: |-
-                      The notification setting for the team. Must be one of notifications_enabled (default) or notifications_disabled.
+                      The notification setting for the team. Must be one of notifications_enabled *(default)- or notifications_disabled.
                       The notification setting for the team. Must be one of 'notifications_enabled' or 'notifications_disabled'.
                     type: string
                   parentTeamId:
@@ -110,14 +110,12 @@ spec:
                     type: string
                   parentTeamReadSlug:
                     description: |-
-                      The slug of the created team, which may or may not differ from name,
-                      depending on whether name contains "URL-unsafe" characters.
-                      Useful when referencing the team in github_branch_protection.
+                      The slug of the created team, which may or may not differ from name, depending on whether name contains "URL-unsafe" characters.
                       The id of the parent team read in Github.
                     type: string
                   privacy:
                     description: |-
-                      The level of privacy for the team. Must be one of secret (default) or closed.
+                      The level of privacy for the team. Must be one of secret *(default)- or closed.
                       The level of privacy for the team. Must be one of 'secret' or 'closed'.
                     type: string
                 type: object
@@ -156,7 +154,7 @@ spec:
                     type: string
                   notificationSetting:
                     description: |-
-                      The notification setting for the team. Must be one of notifications_enabled (default) or notifications_disabled.
+                      The notification setting for the team. Must be one of notifications_enabled *(default)- or notifications_disabled.
                       The notification setting for the team. Must be one of 'notifications_enabled' or 'notifications_disabled'.
                     type: string
                   parentTeamId:
@@ -171,14 +169,12 @@ spec:
                     type: string
                   parentTeamReadSlug:
                     description: |-
-                      The slug of the created team, which may or may not differ from name,
-                      depending on whether name contains "URL-unsafe" characters.
-                      Useful when referencing the team in github_branch_protection.
+                      The slug of the created team, which may or may not differ from name, depending on whether name contains "URL-unsafe" characters.
                       The id of the parent team read in Github.
                     type: string
                   privacy:
                     description: |-
-                      The level of privacy for the team. Must be one of secret (default) or closed.
+                      The level of privacy for the team. Must be one of secret *(default)- or closed.
                       The level of privacy for the team. Must be one of 'secret' or 'closed'.
                     type: string
                 type: object
@@ -313,7 +309,7 @@ spec:
                     type: string
                   notificationSetting:
                     description: |-
-                      The notification setting for the team. Must be one of notifications_enabled (default) or notifications_disabled.
+                      The notification setting for the team. Must be one of notifications_enabled *(default)- or notifications_disabled.
                       The notification setting for the team. Must be one of 'notifications_enabled' or 'notifications_disabled'.
                     type: string
                   parentTeamId:
@@ -328,21 +324,17 @@ spec:
                     type: string
                   parentTeamReadSlug:
                     description: |-
-                      The slug of the created team, which may or may not differ from name,
-                      depending on whether name contains "URL-unsafe" characters.
-                      Useful when referencing the team in github_branch_protection.
+                      The slug of the created team, which may or may not differ from name, depending on whether name contains "URL-unsafe" characters.
                       The id of the parent team read in Github.
                     type: string
                   privacy:
                     description: |-
-                      The level of privacy for the team. Must be one of secret (default) or closed.
+                      The level of privacy for the team. Must be one of secret *(default)- or closed.
                       The level of privacy for the team. Must be one of 'secret' or 'closed'.
                     type: string
                   slug:
                     description: |-
-                      The slug of the created team, which may or may not differ from name,
-                      depending on whether name contains "URL-unsafe" characters.
-                      Useful when referencing the team in github_branch_protection.
+                      The slug of the created team, which may or may not differ from name, depending on whether name contains "URL-unsafe" characters.
                       The slug of the created team.
                     type: string
                 type: object

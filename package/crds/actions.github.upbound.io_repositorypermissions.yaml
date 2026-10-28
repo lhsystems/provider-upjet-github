@@ -189,8 +189,9 @@ spec:
                         type: object
                     type: object
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in a repository.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the repository.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in a repository.
                     type: boolean
                 type: object
               initProvider:
@@ -322,8 +323,9 @@ spec:
                         type: object
                     type: object
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in a repository.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the repository.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in a repository.
                     type: boolean
                 type: object
               managementPolicies:
@@ -462,8 +464,9 @@ spec:
                       The GitHub repository.
                     type: string
                   shaPinningRequired:
-                    description: Whether pinning to a specific SHA is required for
-                      all actions and reusable workflows in a repository.
+                    description: |-
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in the repository.
+                      Whether pinning to a specific SHA is required for all actions and reusable workflows in a repository.
                     type: boolean
                 type: object
               conditions:

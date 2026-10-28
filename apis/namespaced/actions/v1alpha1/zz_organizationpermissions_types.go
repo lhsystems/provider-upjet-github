@@ -108,6 +108,7 @@ type OrganizationPermissionsInitParameters struct {
 	// Sets the list of selected repositories that are enabled for GitHub Actions in an organization. Only available when 'enabled_repositories' = 'selected'.
 	EnabledRepositoriesConfig []EnabledRepositoriesConfigInitParameters `json:"enabledRepositoriesConfig,omitempty" tf:"enabled_repositories_config,omitempty"`
 
+	// Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
 	// Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
 	ShaPinningRequired *bool `json:"shaPinningRequired,omitempty" tf:"sha_pinning_required,omitempty"`
 }
@@ -132,6 +133,7 @@ type OrganizationPermissionsObservation struct {
 
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
 	// Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
 	ShaPinningRequired *bool `json:"shaPinningRequired,omitempty" tf:"sha_pinning_required,omitempty"`
 }
@@ -158,6 +160,7 @@ type OrganizationPermissionsParameters struct {
 	// +kubebuilder:validation:Optional
 	EnabledRepositoriesConfig []EnabledRepositoriesConfigParameters `json:"enabledRepositoriesConfig,omitempty" tf:"enabled_repositories_config,omitempty"`
 
+	// Whether pinning to a specific SHA is required for all actions and reusable workflows in the organization.
 	// Whether pinning to a specific SHA is required for all actions and reusable workflows in an organization.
 	// +kubebuilder:validation:Optional
 	ShaPinningRequired *bool `json:"shaPinningRequired,omitempty" tf:"sha_pinning_required,omitempty"`

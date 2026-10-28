@@ -77,12 +77,12 @@ type BranchNamePatternParameters struct {
 
 type BypassActorsInitParameters struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+	// The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
 	ActorType *string `json:"actorType,omitempty" tf:"actor_type,omitempty"`
 
 	// (String) When the specified actor can bypass the ruleset. pull_request means that an actor can only bypass rules on pull requests. Can be one of: always, pull_request, exempt.
@@ -92,12 +92,12 @@ type BypassActorsInitParameters struct {
 
 type BypassActorsObservation struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+	// The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
 	ActorType *string `json:"actorType,omitempty" tf:"actor_type,omitempty"`
 
 	// (String) When the specified actor can bypass the ruleset. pull_request means that an actor can only bypass rules on pull requests. Can be one of: always, pull_request, exempt.
@@ -107,13 +107,13 @@ type BypassActorsObservation struct {
 
 type BypassActorsParameters struct {
 
-	// (Number) The ID of the actor that can bypass a ruleset. Some actor types such as DeployKey do not have an ID.
-	// The ID of the actor that can bypass a ruleset. When `actor_type` is `OrganizationAdmin`, this should be set to `1`. Some resources such as DeployKey do not have an ID and this should be omitted.
+	// (Number) The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: OrganizationAdmin, EnterpriseOwner, and DeployKey — the GitHub API does not use an ID for these types and will ignore any value set.
+	// The ID of the actor that can bypass a ruleset. Must be omitted for ID-less actor types: `OrganizationAdmin`, `EnterpriseOwner`, and `DeployKey` — the GitHub API does not use an ID for these types and will ignore any value set.
 	// +kubebuilder:validation:Optional
 	ActorID *int64 `json:"actorId,omitempty" tf:"actor_id,omitempty"`
 
-	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin.
-	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, or `DeployKey`.
+	// (String) The type of actor that can bypass a ruleset. Can be one of: RepositoryRole, Team, Integration, OrganizationAdmin, DeployKey, EnterpriseOwner.
+	// The type of actor that can bypass a ruleset. Can be one of: `Integration`, `OrganizationAdmin`, `RepositoryRole`, `Team`, `DeployKey`, or `EnterpriseOwner`.
 	// +kubebuilder:validation:Optional
 	ActorType *string `json:"actorType" tf:"actor_type,omitempty"`
 
@@ -312,13 +312,17 @@ type ConditionsInitParameters struct {
 	// Targets refs that match the specified patterns. Required for `branch` and `tag` targets.
 	RefName []RefNameInitParameters `json:"refName,omitempty" tf:"ref_name,omitempty"`
 
-	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-	// The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
 	RepositoryID []*int64 `json:"repositoryId,omitempty" tf:"repository_id,omitempty"`
 
-	// (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+	// (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
 	// Targets repositories that match the specified name patterns.
 	RepositoryName []RepositoryNameInitParameters `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
+
+	// (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+	// Conditions to target repositories by custom or system properties.
+	RepositoryProperty []RepositoryPropertyInitParameters `json:"repositoryProperty,omitempty" tf:"repository_property,omitempty"`
 }
 
 type ConditionsObservation struct {
@@ -327,13 +331,17 @@ type ConditionsObservation struct {
 	// Targets refs that match the specified patterns. Required for `branch` and `tag` targets.
 	RefName []RefNameObservation `json:"refName,omitempty" tf:"ref_name,omitempty"`
 
-	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-	// The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
 	RepositoryID []*int64 `json:"repositoryId,omitempty" tf:"repository_id,omitempty"`
 
-	// (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+	// (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
 	// Targets repositories that match the specified name patterns.
 	RepositoryName []RepositoryNameObservation `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
+
+	// (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+	// Conditions to target repositories by custom or system properties.
+	RepositoryProperty []RepositoryPropertyObservation `json:"repositoryProperty,omitempty" tf:"repository_property,omitempty"`
 }
 
 type ConditionsParameters struct {
@@ -343,15 +351,20 @@ type ConditionsParameters struct {
 	// +kubebuilder:validation:Optional
 	RefName []RefNameParameters `json:"refName,omitempty" tf:"ref_name,omitempty"`
 
-	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass. Conflicts with repository_name.
-	// The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// (List of Number) The repository IDs that the ruleset applies to. One of these IDs must match for the condition to pass.
+	// The repository IDs that the ruleset applies to. One of these IDs must match for the ruleset to apply.
 	// +kubebuilder:validation:Optional
 	RepositoryID []*int64 `json:"repositoryId,omitempty" tf:"repository_id,omitempty"`
 
-	// (Block List, Max: 1) Conflicts with repository_id. (see below for nested schema)
+	// (Block List, Max: 1) Targets repositories that match the specified name patterns. (see below for nested schema)
 	// Targets repositories that match the specified name patterns.
 	// +kubebuilder:validation:Optional
 	RepositoryName []RepositoryNameParameters `json:"repositoryName,omitempty" tf:"repository_name,omitempty"`
+
+	// (Block List, Max: 1) Targets repositories by custom or system properties. (see below for nested schema)
+	// Conditions to target repositories by custom or system properties.
+	// +kubebuilder:validation:Optional
+	RepositoryProperty []RepositoryPropertyParameters `json:"repositoryProperty,omitempty" tf:"repository_property,omitempty"`
 }
 
 type CopilotCodeReviewInitParameters struct {
@@ -387,6 +400,54 @@ type CopilotCodeReviewParameters struct {
 	// Copilot automatically reviews each new push to the pull request. Defaults to `false`.
 	// +kubebuilder:validation:Optional
 	ReviewOnPush *bool `json:"reviewOnPush,omitempty" tf:"review_on_push,omitempty"`
+}
+
+type ExcludeInitParameters struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	Name *string `json:"name,omitempty" tf:"name"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	PropertyValues []*string `json:"propertyValues,omitempty" tf:"property_values"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	Source *string `json:"source,omitempty" tf:"source"`
+}
+
+type ExcludeObservation struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	PropertyValues []*string `json:"propertyValues,omitempty" tf:"property_values,omitempty"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+}
+
+type ExcludeParameters struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name" tf:"name"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	// +kubebuilder:validation:Optional
+	PropertyValues []*string `json:"propertyValues" tf:"property_values"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// +kubebuilder:validation:Optional
+	Source *string `json:"source,omitempty" tf:"source"`
 }
 
 type FileExtensionRestrictionInitParameters struct {
@@ -434,6 +495,54 @@ type FilePathRestrictionParameters struct {
 	// The file paths that are restricted from being pushed to the commit graph.
 	// +kubebuilder:validation:Optional
 	RestrictedFilePaths []*string `json:"restrictedFilePaths" tf:"restricted_file_paths,omitempty"`
+}
+
+type IncludeInitParameters struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	Name *string `json:"name,omitempty" tf:"name"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	PropertyValues []*string `json:"propertyValues,omitempty" tf:"property_values"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	Source *string `json:"source,omitempty" tf:"source"`
+}
+
+type IncludeObservation struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	Name *string `json:"name,omitempty" tf:"name,omitempty"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	PropertyValues []*string `json:"propertyValues,omitempty" tf:"property_values,omitempty"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	Source *string `json:"source,omitempty" tf:"source,omitempty"`
+}
+
+type IncludeParameters struct {
+
+	// (String) How this rule will appear to users.
+	// The name of the repository property to target.
+	// +kubebuilder:validation:Optional
+	Name *string `json:"name" tf:"name"`
+
+	// (Array of String) The values to match for the repository property.
+	// The values to match for the repository property.
+	// +kubebuilder:validation:Optional
+	PropertyValues []*string `json:"propertyValues" tf:"property_values"`
+
+	// (String) The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// The source of the repository property. Defaults to 'custom' if not specified. Can be one of: custom, system
+	// +kubebuilder:validation:Optional
+	Source *string `json:"source,omitempty" tf:"source"`
 }
 
 type MaxFilePathLengthInitParameters struct {
@@ -487,7 +596,7 @@ type OrganizationRulesetInitParameters struct {
 	BypassActors []BypassActorsInitParameters `json:"bypassActors,omitempty" tf:"bypass_actors,omitempty"`
 
 	// (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-	// Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+	// Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
 	Conditions []ConditionsInitParameters `json:"conditions,omitempty" tf:"conditions,omitempty"`
 
 	// (String) Possible values for Enforcement are disabled, active, evaluate. Note: evaluate is currently only supported for owners of type organization.
@@ -514,7 +623,7 @@ type OrganizationRulesetObservation struct {
 	BypassActors []BypassActorsObservation `json:"bypassActors,omitempty" tf:"bypass_actors,omitempty"`
 
 	// (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-	// Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+	// Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
 	Conditions []ConditionsObservation `json:"conditions,omitempty" tf:"conditions,omitempty"`
 
 	// (String) Possible values for Enforcement are disabled, active, evaluate. Note: evaluate is currently only supported for owners of type organization.
@@ -557,7 +666,7 @@ type OrganizationRulesetParameters struct {
 	BypassActors []BypassActorsParameters `json:"bypassActors,omitempty" tf:"bypass_actors,omitempty"`
 
 	// (Block List, Max: 1) Parameters for an organization ruleset condition. For branch and tag targets, ref_name is required alongside one of repository_name or repository_id. For push targets, ref_name must NOT be set - only repository_name or repository_id should be used. (see below for nested schema)
-	// Parameters for an organization ruleset condition. `ref_name` is required for `branch` and `tag` targets, but must not be set for `push` targets. One of `repository_name` or `repository_id` is always required.
+	// Parameters for an organization ruleset condition.The branch and tag rulesets conditions object should contain both repository_name and ref_name properties, or both repository_id and ref_name properties, or both repository_property and ref_name properties. The push rulesets conditions object does not require the ref_name property.
 	// +kubebuilder:validation:Optional
 	Conditions []ConditionsParameters `json:"conditions,omitempty" tf:"conditions,omitempty"`
 
@@ -763,6 +872,41 @@ type RepositoryNameParameters struct {
 	// Whether renaming of target repositories is prevented.
 	// +kubebuilder:validation:Optional
 	Protected *bool `json:"protected,omitempty" tf:"protected,omitempty"`
+}
+
+type RepositoryPropertyInitParameters struct {
+
+	// (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+	// The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+	Exclude []ExcludeInitParameters `json:"exclude,omitempty" tf:"exclude,omitempty"`
+
+	// (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+	// The repository properties and values to include. All of these properties must match for the condition to pass.
+	Include []IncludeInitParameters `json:"include,omitempty" tf:"include,omitempty"`
+}
+
+type RepositoryPropertyObservation struct {
+
+	// (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+	// The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+	Exclude []ExcludeObservation `json:"exclude,omitempty" tf:"exclude,omitempty"`
+
+	// (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+	// The repository properties and values to include. All of these properties must match for the condition to pass.
+	Include []IncludeObservation `json:"include,omitempty" tf:"include,omitempty"`
+}
+
+type RepositoryPropertyParameters struct {
+
+	// (List of Repository Properties) The repository properties and values to exclude. The condition will not pass if any of these properties match. (see below for nested schema)
+	// The repository properties and values to exclude. The ruleset will not apply if any of these properties match.
+	// +kubebuilder:validation:Optional
+	Exclude []ExcludeParameters `json:"exclude,omitempty" tf:"exclude,omitempty"`
+
+	// (List of Repository Properties) The repository properties and values to include. All of these properties must match for the condition to pass. (see below for nested schema)
+	// The repository properties and values to include. All of these properties must match for the condition to pass.
+	// +kubebuilder:validation:Optional
+	Include []IncludeParameters `json:"include,omitempty" tf:"include,omitempty"`
 }
 
 type RequiredCheckInitParameters struct {
