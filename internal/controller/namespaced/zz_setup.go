@@ -20,6 +20,7 @@ import (
 	repositoryaccesslevel "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/actions/repositoryaccesslevel"
 	repositorypermissions "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/actions/repositorypermissions"
 	runnergroup "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/actions/runnergroup"
+	appinstallationrepositories "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/app/appinstallationrepositories"
 	organization "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/enterprise/organization"
 	organizationruleset "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/enterprise/organizationruleset"
 	organizationcustomproperties "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/organization/organizationcustomproperties"
@@ -34,11 +35,13 @@ import (
 	deploykey "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/deploykey"
 	environment "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/environment"
 	environmentdeploymentpolicy "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/environmentdeploymentpolicy"
+	githubissue "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/githubissue"
 	issuelabels "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/issuelabels"
 	pullrequest "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/pullrequest"
 	repository "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repository"
 	repositoryautolinkreference "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositoryautolinkreference"
 	repositorycollaborator "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositorycollaborator"
+	repositorycollaboratorset "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositorycollaboratorset"
 	repositorycustomproperty "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositorycustomproperty"
 	repositoryfile "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositoryfile"
 	repositoryruleset "github.com/crossplane-contrib/provider-upjet-github/internal/controller/namespaced/repo/repositoryruleset"
@@ -68,6 +71,7 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		repositoryaccesslevel.Setup,
 		repositorypermissions.Setup,
 		runnergroup.Setup,
+		appinstallationrepositories.Setup,
 		organization.Setup,
 		organizationruleset.Setup,
 		organizationcustomproperties.Setup,
@@ -82,11 +86,13 @@ func Setup(mgr ctrl.Manager, o controller.Options) error {
 		deploykey.Setup,
 		environment.Setup,
 		environmentdeploymentpolicy.Setup,
+		githubissue.Setup,
 		issuelabels.Setup,
 		pullrequest.Setup,
 		repository.Setup,
 		repositoryautolinkreference.Setup,
 		repositorycollaborator.Setup,
+		repositorycollaboratorset.Setup,
 		repositorycustomproperty.Setup,
 		repositoryfile.Setup,
 		repositoryruleset.Setup,
@@ -129,6 +135,7 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		repositoryaccesslevel.SetupGated,
 		repositorypermissions.SetupGated,
 		runnergroup.SetupGated,
+		appinstallationrepositories.SetupGated,
 		organization.SetupGated,
 		organizationruleset.SetupGated,
 		organizationcustomproperties.SetupGated,
@@ -143,11 +150,13 @@ func SetupGated(mgr ctrl.Manager, o controller.Options) error {
 		deploykey.SetupGated,
 		environment.SetupGated,
 		environmentdeploymentpolicy.SetupGated,
+		githubissue.SetupGated,
 		issuelabels.SetupGated,
 		pullrequest.SetupGated,
 		repository.SetupGated,
 		repositoryautolinkreference.SetupGated,
 		repositorycollaborator.SetupGated,
+		repositorycollaboratorset.SetupGated,
 		repositorycustomproperty.SetupGated,
 		repositoryfile.SetupGated,
 		repositoryruleset.SetupGated,

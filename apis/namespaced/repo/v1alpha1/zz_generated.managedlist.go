@@ -71,6 +71,15 @@ func (l *EnvironmentList) GetItems() []resource.Managed {
 	return items
 }
 
+// GetItems of this GithubIssueList.
+func (l *GithubIssueList) GetItems() []resource.Managed {
+	items := make([]resource.Managed, len(l.Items))
+	for i := range l.Items {
+		items[i] = &l.Items[i]
+	}
+	return items
+}
+
 // GetItems of this IssueLabelsList.
 func (l *IssueLabelsList) GetItems() []resource.Managed {
 	items := make([]resource.Managed, len(l.Items))
@@ -100,6 +109,15 @@ func (l *RepositoryAutolinkReferenceList) GetItems() []resource.Managed {
 
 // GetItems of this RepositoryCollaboratorList.
 func (l *RepositoryCollaboratorList) GetItems() []resource.Managed {
+	items := make([]resource.Managed, len(l.Items))
+	for i := range l.Items {
+		items[i] = &l.Items[i]
+	}
+	return items
+}
+
+// GetItems of this RepositoryCollaboratorSetList.
+func (l *RepositoryCollaboratorSetList) GetItems() []resource.Managed {
 	items := make([]resource.Managed, len(l.Items))
 	for i := range l.Items {
 		items[i] = &l.Items[i]

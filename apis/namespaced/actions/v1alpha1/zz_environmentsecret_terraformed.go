@@ -21,7 +21,7 @@ func (mg *EnvironmentSecret) GetTerraformResourceType() string {
 
 // GetConnectionDetailsMapping for this EnvironmentSecret
 func (tr *EnvironmentSecret) GetConnectionDetailsMapping() map[string]string {
-	return map[string]string{"plaintext_value": "plaintextValueSecretRef"}
+	return map[string]string{"encrypted_value": "encryptedValueSecretRef", "plaintext_value": "plaintextValueSecretRef", "value": "valueSecretRef", "value_encrypted": "valueEncryptedSecretRef"}
 }
 
 // GetObservation of this EnvironmentSecret

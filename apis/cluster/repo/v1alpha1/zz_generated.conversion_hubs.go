@@ -28,6 +28,9 @@ func (tr *Environment) Hub() {}
 func (tr *EnvironmentDeploymentPolicy) Hub() {}
 
 // Hub marks this type as a conversion hub.
+func (tr *GithubIssue) Hub() {}
+
+// Hub marks this type as a conversion hub.
 func (tr *IssueLabels) Hub() {}
 
 // Hub marks this type as a conversion hub.
@@ -41,6 +44,9 @@ func (tr *RepositoryAutolinkReference) Hub() {}
 
 // Hub marks this type as a conversion hub.
 func (tr *RepositoryCollaborator) Hub() {}
+
+// Hub marks this type as a conversion hub.
+func (tr *RepositoryCollaboratorSet) Hub() {}
 
 // Hub marks this type as a conversion hub.
 func (tr *RepositoryCustomProperty) Hub() {}

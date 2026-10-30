@@ -120,7 +120,7 @@ type RepositoryWebhookObservation struct {
 	// The repository name of the webhook, not including the organization, which will be inferred.
 	Repository *string `json:"repository,omitempty" tf:"repository,omitempty"`
 
-	// URL of the webhook.  This is a sensitive attribute because it may include basic auth credentials.
+	// URL of the webhook. This is a sensitive attribute because it may include basic auth credentials.
 	// Configuration block for the webhook
 	URL *string `json:"url,omitempty" tf:"url,omitempty"`
 }

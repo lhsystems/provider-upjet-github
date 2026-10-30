@@ -355,6 +355,7 @@ spec:
               atProvider:
                 properties:
                   etag:
+                    description: An etag representing the external group state
                     type: string
                   groupId:
                     description: |-
@@ -363,12 +364,16 @@ spec:
                     format: int64
                     type: integer
                   groupName:
-                    description: Name of the external group.
+                    description: |-
+                      The name of the external group
+                      Name of the external group.
                     type: string
                   id:
                     type: string
                   teamId:
-                    description: ID of the GitHub team.
+                    description: |-
+                      The ID of the GitHub team
+                      ID of the GitHub team.
                     format: int64
                     type: integer
                   teamSlug:

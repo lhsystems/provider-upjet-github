@@ -62,9 +62,17 @@ type EnvironmentDeploymentPolicyObservation struct {
 
 	ID *string `json:"id,omitempty" tf:"id,omitempty"`
 
+	// The ID of the deployment policy.
+	// The ID of the deployment policy.
+	PolicyID *int64 `json:"policyId,omitempty" tf:"policy_id,omitempty"`
+
 	// The repository of the environment.
 	// The name of the GitHub repository.
 	Repository *string `json:"repository,omitempty" tf:"repository,omitempty"`
+
+	// The ID of the repository.
+	// The ID of the GitHub repository.
+	RepositoryID *int64 `json:"repositoryId,omitempty" tf:"repository_id,omitempty"`
 
 	// The name pattern that tags must match in order to deploy to the environment. If not specified, branch_pattern must be specified.
 	// The name pattern that tags must match in order to deploy to the environment.

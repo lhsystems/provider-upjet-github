@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	testNamespace  = "team-a"
-	testBudgetName = "budget"
+	testNamespace          = "team-a"
+	testBudgetName         = "budget"
+	testProviderConfigName = "github"
 )
 
 func TestProviderConfigRejectsUnsupportedKind(t *testing.T) {
@@ -32,7 +33,7 @@ func TestProviderConfigRejectsUnsupportedKind(t *testing.T) {
 		t.Run(kind, func(t *testing.T) {
 			cr := &enterprise.Budget{}
 			cr.Namespace = testNamespace
-			cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: kind, Name: "github"}
+			cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: kind, Name: testProviderConfigName}
 			r := &reconciler{}
 
 			if _, err := r.providerConfig(context.Background(), cr); err == nil || !strings.Contains(err.Error(), "unsupported ProviderConfig reference kind") {
@@ -91,14 +92,14 @@ func TestServiceUsesNamespacedProviderConfig(t *testing.T) {
 	}
 
 	pc := &providerconfig.ProviderConfig{}
-	pc.Name = "github"
+	pc.Name = testProviderConfigName
 	pc.Namespace = testNamespace
 	pc.Spec.Credentials.Source = xpv1.CredentialsSource("None")
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc).Build()
 	cr := &enterprise.Budget{}
 	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: providerConfigKind, Name: testProviderConfigName}
 
 	r := &reconciler{
 		Client: kubeClient,
@@ -125,7 +126,7 @@ func TestDeleteRetainsFinalizerWhenProviderConfigUnavailable(t *testing.T) {
 	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.Finalizers = []string{finalizer}
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: providerConfigKind, Name: testProviderConfigName}
 	cr.Status.AtProvider.ID = func() *string { value := "budget-id"; return &value }()
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cr).Build()
@@ -156,7 +157,7 @@ func TestProviderConfigUsageTracking(t *testing.T) {
 	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
 	cr.UID = types.UID("budget-uid")
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: providerConfigKind, Name: testProviderConfigName}
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).Build()
 	tracker := resource.NewProviderConfigUsageTracker(kubeClient, &providerconfig.ProviderConfigUsage{})
@@ -168,7 +169,7 @@ func TestProviderConfigUsageTracking(t *testing.T) {
 	if err := kubeClient.Get(context.Background(), client.ObjectKey{Name: string(cr.UID), Namespace: cr.Namespace}, usage); err != nil {
 		t.Fatalf("Get() error = %v", err)
 	}
-	if got := usage.GetProviderConfigReference(); got.Name != "github" || got.Kind != "ProviderConfig" {
+	if got := usage.GetProviderConfigReference(); got.Name != testProviderConfigName || got.Kind != providerConfigKind {
 		t.Fatalf("ProviderConfigReference = %#v, want ProviderConfig/github", got)
 	}
 }
@@ -183,7 +184,7 @@ func TestServiceUsesBudgetNamespaceForCredentialSecret(t *testing.T) {
 	}
 
 	pc := &providerconfig.ProviderConfig{}
-	pc.Name = "github"
+	pc.Name = testProviderConfigName
 	pc.Namespace = testNamespace
 	pc.Spec.Credentials.Source = xpv1.CredentialsSourceSecret
 	pc.Spec.Credentials.SecretRef = &xpv1.SecretKeySelector{
@@ -197,7 +198,7 @@ func TestServiceUsesBudgetNamespaceForCredentialSecret(t *testing.T) {
 	cr := &enterprise.Budget{}
 	cr.Name = testBudgetName
 	cr.Namespace = testNamespace
-	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: "ProviderConfig", Name: "github"}
+	cr.Spec.ProviderConfigReference = &xpv1.ProviderConfigReference{Kind: providerConfigKind, Name: testProviderConfigName}
 
 	kubeClient := fake.NewClientBuilder().WithScheme(scheme).WithObjects(pc, secret).Build()
 	r := &reconciler{
